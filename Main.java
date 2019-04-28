@@ -118,6 +118,23 @@ public class Main extends Application {
       // Registering the event filter
       addButton.addEventFilter(MouseEvent.MOUSE_CLICKED, addEventHandler);
 
+      
+      
+      
+      // Creating the mouse event handler for the Add Question Button
+      EventHandler<MouseEvent> createEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+        	int numQuestions = Integer.parseInt(numText.getText());
+        	// must figure out how to pull quiz topic from combo box
+        	String topic = "howdy";
+        
+          displayQuiz(primaryStage, numQuestions, topic);
+        }
+      };
+      // Registering the event filter
+      createButton.addEventFilter(MouseEvent.MOUSE_CLICKED, createEventHandler);
+
 
       // Creating the mouse event handler for the Save Questions Button
       EventHandler<MouseEvent> saveEventHandler = new EventHandler<MouseEvent>() {
@@ -135,6 +152,61 @@ public class Main extends Application {
     }
   }
 
+  public void displayQuiz(Stage primaryStage, int numQuestions, String topic) {
+	  try {
+		  // title to go on the main page
+		  Label title = new Label("To Begin the quiz, select 'Start', otherwise return to home");
+	      title.setTextFill(Color.DARKGREEN);
+	      title.setStyle("-fx-font: 18 arial;");
+	      
+	      // button to enter quiz
+	      Button submitButton = new Button();
+	      submitButton.setText("Start the Quiz");
+	      submitButton.setTextFill(Color.DARKGREEN);
+	      submitButton.setStyle("-fx-font: 18 arial;");
+
+	      // button to submit a question
+	      Button homeButton = new Button();
+	      homeButton.setText("Back to Home");
+	      homeButton.setTextFill(Color.DARKGREEN);
+	      homeButton.setStyle("-fx-font: 18 arial;");
+	      
+	      GridPane grid = new GridPane();
+	      grid.setAlignment(Pos.CENTER);
+	      grid.setHgap(5);
+	      grid.setVgap(10);
+	      grid.setPadding(new Insets(25, 25, 25, 25));
+	      
+	      grid.add(title, 0, 1);
+	      grid.add(submitButton, 1, 2);
+	      grid.add(homeButton, 1, 0);
+	      
+	      Scene scene = new Scene(grid, 700, 400);
+	      grid.setStyle("-fx-background-color: #f5f5dc");
+	      
+	      // Adds the scene to the stage.
+	      scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+	      primaryStage.setScene(scene);
+	      primaryStage.show();
+	      primaryStage.setTitle("Start the Quiz");
+	      
+	      // Creating the mouse event handler for going back to homepage
+	      EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
+	        @Override
+	        public void handle(MouseEvent e) {
+	          start(primaryStage);
+	        }
+	      };
+	      // Registering the event filter
+	      homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
+	      
+	  } catch (Exception e) {
+		  e.printStackTrace();
+	  }
+	  
+  }
+  
+  
   /**
    * This method creates the scene for adding a question. The user is prompted to enter the question
    * itself, the multiple choice options, a picture image, the topic it is associated with, and the
@@ -146,7 +218,7 @@ public class Main extends Application {
     try {
       // title table to go in the top corner
       Label title = new Label("Add Question");
-      title.setTextFill(Color.BLACK);
+      title.setTextFill(Color.DARKGREEN);
       title.setStyle("-fx-font: 18 arial;");
 
       // Adds a text field and title for the user to enter the topic of the question.
@@ -214,6 +286,7 @@ public class Main extends Application {
       primaryStage.setScene(scene);
       primaryStage.show();
       primaryStage.setTitle("Add Question");
+      
 
       // Creating the mouse event handler for the Save Questions Button
       EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
@@ -246,7 +319,7 @@ public class Main extends Application {
           String answer = choices[0].getChoice();
           
           Question question = new Question(topic, choices, theQuestion, answer);
-          // FIXME Add quesiton to question data base
+          // FIXME Add question to question data base
           start(primaryStage);
         }
       };
