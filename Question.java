@@ -1,16 +1,19 @@
 package application;
 
 /**
- * The question class. Each question has a list of fields associated to it and this class
- * allows for the access of that information. 
+ * The question class. Each question has a list of fields associated to it and this class allows for
+ * the access of that information.
+ * 
  * @author Turner
  *
  */
 public class Question {
 
-  // private fields for the question class. Each question has a topic it is associated with and a list
-  // of options for the user to choose. There is a field for the correct answer, and an image that may
-  // be involved with the question. 
+  // private fields for the question class. Each question has a topic it is associated with and a
+  // list
+  // of options for the user to choose. There is a field for the correct answer, and an image that
+  // may
+  // be involved with the question.
   private String topic;
   private Choice[] choices;
   private String image;
@@ -25,7 +28,7 @@ public class Question {
    * @param theChoices
    * @param theQuestion
    */
-  public void Question(String theTopic, Choice[] theChoices, String theQuestion,
+  public Question(String theTopic, Choice[] theChoices, String theQuestion,
       String correctAnswer) {
     topic = theTopic;
     choices = theChoices;
@@ -81,4 +84,3 @@ public class Question {
 
 
 }
-

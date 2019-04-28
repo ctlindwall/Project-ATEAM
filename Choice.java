@@ -19,7 +19,7 @@ public class Choice {
    * @param aChoice
    * @param isCorrect
    */
-  public void Choice(String aChoice, boolean isCorrect) {
+  public Choice(String aChoice, boolean isCorrect) {
     option = aChoice;
     correct = isCorrect;
   }
