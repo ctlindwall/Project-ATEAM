@@ -69,6 +69,8 @@ public class Main extends Application {
       addButton.setTextFill(Color.DARKGREEN);
       addButton.setStyle("-fx-font: 18 arial;");
 
+      // FIXME we should look to see if javafx has a text field for ints so we dont
+      // have to worry about parsing faulty input.
       // label and drop-down menu for number of questions
       Label numQuestions = new Label("Number of Questions:");
       numQuestions.setTextFill(Color.DARKGREEN);
@@ -77,6 +79,9 @@ public class Main extends Application {
       // label and drop-down menu for quiz topics
       Label quizTopic = new Label("Quiz Topic:");
       quizTopic.setTextFill(Color.DARKGREEN);
+
+      // FIXME Right here we should access the observable list within the question database
+      // class
       ObservableList<String> topics =
           FXCollections.observableArrayList("math", "science", "english");
       ComboBox<String> topicsBox = new ComboBox<String>(topics);
@@ -102,7 +107,7 @@ public class Main extends Application {
       grid.add(createButton, 2, 5);
 
 
-      Scene scene = new Scene(grid, 500, 275);
+      Scene scene = new Scene(grid, 500, 300);
       grid.setStyle("-fx-background-color: #f5f5dc");
       scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
       primaryStage.setScene(scene);
@@ -118,29 +123,6 @@ public class Main extends Application {
       // Registering the event filter
       addButton.addEventFilter(MouseEvent.MOUSE_CLICKED, addEventHandler);
 
-      
-      
-      
-      // Creating the mouse event handler for the Add Question Button
-      EventHandler<MouseEvent> createEventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-        	try {
-        		// figure out why we cant parse int here.
-        	int numberQuestions = Integer.parseInt(numText.getText());
-        	// must figure out how to pull quiz topic from combo box
-        	String topic = "howdy";
-        
-          displayQuiz(primaryStage, numberQuestions, topic);
-        	} catch (Exception f) {
-        		f.printStackTrace();
-        	}
-       
-        }
-      };
-      // Registering the event filter
-      createButton.addEventFilter(MouseEvent.MOUSE_CLICKED, createEventHandler);
-
 
       // Creating the mouse event handler for the Save Questions Button
       EventHandler<MouseEvent> saveEventHandler = new EventHandler<MouseEvent>() {
@@ -153,66 +135,27 @@ public class Main extends Application {
       // Registering the event filter
       saveButton.addEventFilter(MouseEvent.MOUSE_CLICKED, saveEventHandler);
 
+      // Creating the mouse event handler for the Add Question Button
+      EventHandler<MouseEvent> createEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          // FIXME we need to fix this parsing it doesn't work. we need to look into
+          // how to obtain the number entered.
+          int numQuestions = Integer.parseInt(numText.getText());
+          // must figure out how to pull quiz topic from combo box
+          String topic = "howdy";
+
+          displayQuiz(primaryStage, numQuestions, topic);
+        }
+      };
+      // Registering the event filter
+      createButton.addEventFilter(MouseEvent.MOUSE_CLICKED, createEventHandler);
+
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public void displayQuiz(Stage primaryStage, int numQuestions, String topic) {
-	  try {
-		  // title to go on the main page
-		  Label title = new Label("To Begin the quiz, select 'Start', otherwise return to home");
-	      title.setTextFill(Color.DARKGREEN);
-	      title.setStyle("-fx-font: 18 arial;");
-	      
-	      // button to enter quiz
-	      Button submitButton = new Button();
-	      submitButton.setText("Start the Quiz");
-	      submitButton.setTextFill(Color.DARKGREEN);
-	      submitButton.setStyle("-fx-font: 18 arial;");
-
-	      // button to submit a question
-	      Button homeButton = new Button();
-	      homeButton.setText("Back to Home");
-	      homeButton.setTextFill(Color.DARKGREEN);
-	      homeButton.setStyle("-fx-font: 18 arial;");
-	      
-	      GridPane grid = new GridPane();
-	      grid.setAlignment(Pos.CENTER);
-	      grid.setHgap(5);
-	      grid.setVgap(10);
-	      grid.setPadding(new Insets(25, 25, 25, 25));
-	      
-	      grid.add(title, 0, 1);
-	      grid.add(submitButton, 1, 2);
-	      grid.add(homeButton, 1, 0);
-	      
-	      Scene scene = new Scene(grid, 700, 400);
-	      grid.setStyle("-fx-background-color: #f5f5dc");
-	      
-	      // Adds the scene to the stage.
-	      scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-	      primaryStage.setScene(scene);
-	      primaryStage.show();
-	      primaryStage.setTitle("Start the Quiz");
-	      
-	      // Creating the mouse event handler for going back to homepage
-	      EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
-	        @Override
-	        public void handle(MouseEvent e) {
-	          start(primaryStage);
-	        }
-	      };
-	      // Registering the event filter
-	      homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
-	      
-	  } catch (Exception e) {
-		  e.printStackTrace();
-	  }
-	  
-  }
-  
-  
   /**
    * This method creates the scene for adding a question. The user is prompted to enter the question
    * itself, the multiple choice options, a picture image, the topic it is associated with, and the
@@ -222,11 +165,6 @@ public class Main extends Application {
    */
   public void addQuestion(Stage primaryStage) {
     try {
-      // title table to go in the top corner
-      Label title = new Label("Add Question");
-      title.setTextFill(Color.DARKGREEN);
-      title.setStyle("-fx-font: 18 arial;");
-
       // Adds a text field and title for the user to enter the topic of the question.
       Label topicLabel = new Label("Topic:");
       topicLabel.setTextFill(Color.DARKGREEN);
@@ -261,7 +199,10 @@ public class Main extends Application {
       homeButton.setStyle("-fx-font: 18 arial;");
 
 
-      // FIXME We need to add image stuff as well but i don't know how to do that - Turner
+      // Adds a text field for the user to enter a question
+      Label imageLabel = new Label("Image File:");
+      imageLabel.setTextFill(Color.DARKGREEN);
+      TextField imageText = new TextField();
 
       // Creates a grid to add the pieces to.
       GridPane grid = new GridPane();
@@ -272,6 +213,8 @@ public class Main extends Application {
 
       grid.add(topicLabel, 0, 0);
       grid.add(topicText, 0, 1);
+      grid.add(imageLabel, 2, 1);
+      grid.add(imageText, 2, 2);
       grid.add(questionLabel, 0, 2);
       grid.add(questionText, 0, 3);
       grid.add(choiceLabel, 0, 4);
@@ -292,7 +235,6 @@ public class Main extends Application {
       primaryStage.setScene(scene);
       primaryStage.show();
       primaryStage.setTitle("Add Question");
-      
 
       // Creating the mouse event handler for the Save Questions Button
       EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
@@ -304,34 +246,152 @@ public class Main extends Application {
       // Registering the event filter
       homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
-      // Creating the mouse event handler for the Save Questions Button
+      // Creating the mouse event handler for the Submit Questions Button
       EventHandler<MouseEvent> submitEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
-          // Obtains the topic. 
+          // Obtains the topic.
           String topic = topicText.getText();
-          
+
           // Creates the choice array.
           Choice[] choices = new Choice[4];
           choices[0] = new Choice(choiceOneText.getText(), true);
           choices[1] = new Choice(choiceTwoText.getText(), false);
           choices[2] = new Choice(choiceThreeText.getText(), false);
           choices[3] = new Choice(choiceFourText.getText(), false);
-          
+
           // Obtains the question
           String theQuestion = questionText.getText();
-          
+
           // Obtains the correct answer
           String answer = choices[0].getChoice();
-          
+
           Question question = new Question(topic, choices, theQuestion, answer);
-          // FIXME Add question to question data base
-          start(primaryStage);
+
+          // FIXME Add quesiton to question data base
+          AddQuestionSuccess(primaryStage);
         }
       };
       // Registering the event filter
       submitButton.addEventFilter(MouseEvent.MOUSE_CLICKED, submitEventHandler);
 
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+  }
+
+  /**
+   * Just a lil method that lets the user know their question was successfully added.
+   * 
+   * @param primaryStage
+   */
+  public void AddQuestionSuccess(Stage primaryStage) {
+
+    // title table to go in the top corner
+    Label title = new Label("Your Question Was");
+    title.setFont(Font.font("Verdana", 25));
+    title.setTextFill(Color.DARKGREEN);
+
+    // title table to go in the top corner
+    Label title2 = new Label("Successfully Added!");
+    title2.setFont(Font.font("Verdana", 25));
+    title2.setTextFill(Color.DARKGREEN);
+
+    // button to go bak home
+    Button homeButton = new Button();
+    homeButton.setText("Back to Home");
+    homeButton.setTextFill(Color.DARKGREEN);
+    homeButton.setStyle("-fx-font: 18 arial;");
+
+    // Creates a grid to add the pieces to.
+    GridPane grid = new GridPane();
+    grid.setAlignment(Pos.CENTER);
+    grid.setHgap(5);
+    grid.setVgap(10);
+    grid.setPadding(new Insets(25, 25, 25, 25));
+
+    // Adds to the grid
+    grid.add(title, 0, 0);
+    grid.add(title2, 0, 1);
+    grid.add(homeButton, 0, 2);
+
+    // Creates the new scene.
+    Scene scene = new Scene(grid, 500, 300);
+    grid.setStyle("-fx-background-color: #f5f5dc");
+
+    // Adds the scene to the stage.
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    primaryStage.setScene(scene);
+    primaryStage.show();
+
+    // Creating the mouse event handler for the Save Questions Button
+    EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        start(primaryStage);
+      }
+    };
+    // Registering the event filter
+    homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
+
+  }
+
+  /**
+   * This is a method that displays the information for the create quiz page.
+   * 
+   * @param primaryStage
+   * @param numQuestions
+   * @param topic
+   */
+  public void displayQuiz(Stage primaryStage, int numQuestions, String topic) {
+    try {
+      // title to go on the main page
+      Label title = new Label("To Begin the quiz, select 'Start', otherwise return to home");
+      title.setTextFill(Color.DARKGREEN);
+      title.setStyle("-fx-font: 18 arial;");
+
+      // button to enter quiz
+      Button submitButton = new Button();
+      submitButton.setText("Start the Quiz");
+      submitButton.setTextFill(Color.DARKGREEN);
+      submitButton.setStyle("-fx-font: 18 arial;");
+
+      // button to submit a question
+      Button homeButton = new Button();
+      homeButton.setText("Back to Home");
+      homeButton.setTextFill(Color.DARKGREEN);
+      homeButton.setStyle("-fx-font: 18 arial;");
+
+      GridPane grid = new GridPane();
+      grid.setAlignment(Pos.CENTER);
+      grid.setHgap(5);
+      grid.setVgap(10);
+      grid.setPadding(new Insets(25, 25, 25, 25));
+
+      grid.add(title, 0, 1);
+      grid.add(submitButton, 1, 2);
+      grid.add(homeButton, 1, 0);
+
+      Scene scene = new Scene(grid, 700, 400);
+      grid.setStyle("-fx-background-color: #f5f5dc");
+
+      // Adds the scene to the stage.
+      scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+      primaryStage.setScene(scene);
+      primaryStage.show();
+      primaryStage.setTitle("Start the Quiz");
+
+      // Creating the mouse event handler for going back to homepage
+      EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          start(primaryStage);
+        }
+      };
+      // Registering the event filter
+      homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
     } catch (Exception e) {
       e.printStackTrace();
