@@ -125,11 +125,17 @@ public class Main extends Application {
       EventHandler<MouseEvent> createEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
-        	int numQuestions = Integer.parseInt(numText.getText());
+        	try {
+        		// figure out why we cant parse int here.
+        	int numberQuestions = Integer.parseInt(numText.getText());
         	// must figure out how to pull quiz topic from combo box
         	String topic = "howdy";
         
-          displayQuiz(primaryStage, numQuestions, topic);
+          displayQuiz(primaryStage, numberQuestions, topic);
+        	} catch (Exception f) {
+        		f.printStackTrace();
+        	}
+       
         }
       };
       // Registering the event filter
