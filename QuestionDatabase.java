@@ -1,11 +1,20 @@
 package application;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 
 /**
  * This class contains all the questions that can be chosen from, and stores them in a hash map
@@ -16,14 +25,14 @@ import javafx.collections.ObservableList;
  */
 public class QuestionDatabase {
   private Map<String, List<Question>> topics; // hash map with all the topics and questions
-  // private int currentCapacity; // current capacity of the hashmap
+  private ObservableList<String> observableTopics;
 
   /**
    * Default constructor
    */
   public QuestionDatabase() {
     topics = new HashMap<String, List<Question>>(20);
-
+    observableTopics = FXCollections.observableArrayList();
   }
 
   /**
@@ -92,9 +101,62 @@ public class QuestionDatabase {
    * Loads questions from the json file
    * 
    * @param questions
+   * @throws ParseException
+   * @throws IOException
    */
-  public void loadQuestionsFromJSON(File questions) {
-    // not sure how to use this
+  public void loadQuestionsFromJSON(File questions)
+      throws FileNotFoundException, IOException, ParseException {
+
+    String metaData; // meta data field from the json file
+    String questionText; // string of the question being asked
+    String topic; // topic of the question
+    String image; // image associated with the question
+    Choice[] choices = new Choice[4]; // array of type Choice with all possible choices
+    String correctAnswer = null; // the correct answer to the question
+
+    Object obj = new JSONParser().parse(new FileReader(questions)); // start parsing json
+    JSONObject jo = (JSONObject) obj;
+    JSONArray questionArray = (JSONArray) jo.get("questionArray");
+
+    for (int i = 0; i < questionArray.size(); i++) { // for every question
+      JSONObject jsonQuestion = (JSONObject) questionArray.get(i);
+      metaData = (String) jsonQuestion.get("meta-data"); // parse data for meta data
+      questionText = (String) jsonQuestion.get("questionText"); // parse question text
+      topic = (String) jsonQuestion.get("topic"); // parse question topic
+      image = (String) jsonQuestion.get("image"); // parse image file
+
+      JSONArray questionChoices = (JSONArray) jsonQuestion.get("choiceArray"); // array for possible
+                                                                               // choices
+      for (int c = 0; c < questionChoices.size(); c++) { // for each choice
+        JSONObject jsonChoice = (JSONObject) questionChoices.get(c);
+        String isCorrect = (String) jsonChoice.get("isCorrect"); // saves if it is correct or not to
+                                                                 // isCorrect variable
+        String choice = (String) jsonChoice.get("choice"); // parse the string for the choice
+
+        if (isCorrect.equals("T")) { // if correct answer
+          correctAnswer = (String) jsonChoice.get("choice"); // should be only one correct answer
+          Choice choiceObj = new Choice(choice, true); // create a new choice that is the correct
+                                                       // answer
+          choices[c] = choiceObj; // add to choice array
+        } else {
+          Choice choiceObj = new Choice(choice, false); // create a new choice that is the incorrect
+                                                        // answer
+          choices[c] = choiceObj; // add to choice array
+        }
+
+
+      }
+
+      Question finishedQuestion =
+          new Question(topic, choices, questionText, correctAnswer, image, metaData);
+
+      // add the question to the question database
+      addQuestion(topic, finishedQuestion); // do we need this here ???
+
+    }
+
+
+
   }
 
   /**
@@ -103,7 +165,6 @@ public class QuestionDatabase {
    * @return topicsList list of all possible topics
    */
   public ObservableList<String> getTopics() {
-    // not sure
-    return null;
+    return observableTopics;
   }
 }
