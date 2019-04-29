@@ -50,6 +50,7 @@ public class QuestionDatabase {
       topics.replace(topic, topicQuestions); // replace the topic key with the updated list of
                                              // questions
     } else { // topic is not in the hash map
+      observableTopics.add(topic);
       List<Question> topicQuestions = new LinkedList<Question>(); // new linked list of questions
       topicQuestions.add(question); // add the new question to the list
       topics.put(topic, topicQuestions); // add the new topic and question to the hash map
@@ -71,6 +72,8 @@ public class QuestionDatabase {
 
     return numQuestions; // returns number of questions
   }
+  
+   // FIXME need a number of total questions
 
   /**
    * This saves the given question file to a json file
@@ -165,6 +168,7 @@ public class QuestionDatabase {
    * @return topicsList list of all possible topics
    */
   public ObservableList<String> getTopics() {
+    
     return observableTopics;
   }
 }
