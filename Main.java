@@ -268,14 +268,13 @@ public class Main extends Application {
       EventHandler<MouseEvent> submitEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
-
-          // FIXME the eror stuff doesn't work yet.
-
+          // Keeps track of whether or not the user entered in all the necessary information.
+          boolean error = false;
           // Obtains the topic.
           String topic = topicText.getText();
           // If user didn't enter a topic error screen prints.
           if ((topic == null) || (topic.equals(""))) {
-            ErrorOccurred(primaryStage);
+            error = true;
           }
 
           // Creates the choice array.
@@ -288,7 +287,7 @@ public class Main extends Application {
           // If user didn't enter a choice error screen prints.
           for (int i = 0; i < choices.length; i++) {
             if ((choices[i].getChoice() == null) || (choices[i].getChoice().equals(""))) {
-              ErrorOccurred(primaryStage);
+              error = true;
             }
           }
 
@@ -296,15 +295,13 @@ public class Main extends Application {
           String theQuestion = questionText.getText();
           // If user didn't enter a topic error screen prints.
           if ((theQuestion == null) || (theQuestion.equals(""))) {
-            ErrorOccurred(primaryStage);
+            error = true;
           }
 
           // Obtains the correct answer
           String answer = choices[0].getChoice();
 
-          // FIXME Need to find out how to obtain file string form the button and
-          // file chooser.
-          String image = "IMAGE STRING";
+          String image = loadImageButton.getText();
 
           // FIXME passes in unused as default parameter becuase I dont understand metadata.
           Question question = new Question(topic, choices, theQuestion, answer, image, "unused");
@@ -312,7 +309,11 @@ public class Main extends Application {
 
 
           // FIXME Add question to question data base
+          if (error) {
+          ErrorOccurred(primaryStage);
+          } else {
           AddQuestionSuccess(primaryStage);
+          }
         }
       };
       // Registering the event filter
@@ -325,6 +326,7 @@ public class Main extends Application {
           FileChooser fileChooser = new FileChooser();
           File file = fileChooser.showOpenDialog(primaryStage);
           if (file != null) {
+            loadImageButton.setText(file.getName());
             // title to let the user know their file was successfully added.
             Label titleImage = new Label("Image Chosen.");
             titleImage.setTextFill(Color.RED);
@@ -512,7 +514,7 @@ public class Main extends Application {
           FileChooser fileChooser = new FileChooser();
           File file = fileChooser.showOpenDialog(primaryStage);
           if (file != null) {
-
+            loadFileButton.setText(file.getName());
             // FIXME We need to create a question database object and call load json stuff.
 
             // title to let the user know their file was successfully added.
@@ -582,7 +584,7 @@ public class Main extends Application {
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
-    primaryStage.setTitle("Load Questions From JSON");
+    primaryStage.setTitle("ERROR");
 
     // Creating the mouse event handler for going back to homepage
     EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
