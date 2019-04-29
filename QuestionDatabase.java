@@ -72,8 +72,8 @@ public class QuestionDatabase {
 
     return numQuestions; // returns number of questions
   }
-  
-   // FIXME need a number of total questions
+
+  // FIXME need a number of total questions
 
   /**
    * This saves the given question file to a json file
@@ -114,7 +114,7 @@ public class QuestionDatabase {
     String questionText; // string of the question being asked
     String topic; // topic of the question
     String image; // image associated with the question
-    Choice[] choices = new Choice[4]; // array of type Choice with all possible choices
+    Choice[] choices = null; // array of type Choice with all possible choices
     String correctAnswer = null; // the correct answer to the question
 
     Object obj = new JSONParser().parse(new FileReader(questions)); // start parsing json
@@ -135,7 +135,7 @@ public class QuestionDatabase {
         String isCorrect = (String) jsonChoice.get("isCorrect"); // saves if it is correct or not to
                                                                  // isCorrect variable
         String choice = (String) jsonChoice.get("choice"); // parse the string for the choice
-
+        choices = new Choice[questionChoices.size()];
         if (isCorrect.equals("T")) { // if correct answer
           correctAnswer = (String) jsonChoice.get("choice"); // should be only one correct answer
           Choice choiceObj = new Choice(choice, true); // create a new choice that is the correct
@@ -146,20 +146,10 @@ public class QuestionDatabase {
                                                         // answer
           choices[c] = choiceObj; // add to choice array
         }
-
-
       }
-
       Question finishedQuestion =
           new Question(topic, choices, questionText, correctAnswer, image, metaData);
-
-      // add the question to the question database
-      addQuestion(topic, finishedQuestion); // do we need this here ???
-
     }
-
-
-
   }
 
   /**
@@ -168,7 +158,7 @@ public class QuestionDatabase {
    * @return topicsList list of all possible topics
    */
   public ObservableList<String> getTopics() {
-    
+
     return observableTopics;
   }
 }
