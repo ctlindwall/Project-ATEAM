@@ -1,5 +1,6 @@
 package application;
 
+import java.io.File;
 import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -8,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -71,7 +73,7 @@ public class Main extends Application {
 
       // FIXME we should look to see if javafx has a text field for ints so we dont
       // have to worry about parsing faulty input.
-      // label and drop-down menu for number of questions
+      // label and drop-down menu for number of questions - Turner
       Label numQuestions = new Label("Number of Questions:");
       numQuestions.setTextFill(Color.DARKGREEN);
       TextField numText = new TextField();
@@ -81,7 +83,7 @@ public class Main extends Application {
       quizTopic.setTextFill(Color.DARKGREEN);
 
       // FIXME Right here we should access the observable list within the question database
-      // class
+      // class - Turner
       ObservableList<String> topics =
           FXCollections.observableArrayList("math", "science", "english");
       ComboBox<String> topicsBox = new ComboBox<String>(topics);
@@ -135,6 +137,7 @@ public class Main extends Application {
       // Registering the event filter
       saveButton.addEventFilter(MouseEvent.MOUSE_CLICKED, saveEventHandler);
 
+      // FIXME
       // Creating the mouse event handler for the Add Question Button
       EventHandler<MouseEvent> createEventHandler = new EventHandler<MouseEvent>() {
         @Override
@@ -150,6 +153,17 @@ public class Main extends Application {
       };
       // Registering the event filter
       createButton.addEventFilter(MouseEvent.MOUSE_CLICKED, createEventHandler);
+
+
+      // Creating the mouse event handler for the Add Question Button
+      EventHandler<MouseEvent> loadEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          loadJSON(primaryStage);
+        }
+      };
+      // Registering the event filter
+      loadButton.addEventFilter(MouseEvent.MOUSE_CLICKED, loadEventHandler);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -202,7 +216,11 @@ public class Main extends Application {
       // Adds a text field for the user to enter a question
       Label imageLabel = new Label("Image File:");
       imageLabel.setTextFill(Color.DARKGREEN);
-      TextField imageText = new TextField();
+      // button to go back home
+      Button loadImageButton = new Button();
+      loadImageButton.setText("Choose Image");
+      loadImageButton.setTextFill(Color.DARKGREEN);
+      loadImageButton.setStyle("-fx-font: 18 arial;");
 
       // Creates a grid to add the pieces to.
       GridPane grid = new GridPane();
@@ -214,7 +232,7 @@ public class Main extends Application {
       grid.add(topicLabel, 0, 0);
       grid.add(topicText, 0, 1);
       grid.add(imageLabel, 2, 1);
-      grid.add(imageText, 2, 2);
+      grid.add(loadImageButton, 2, 2);
       grid.add(questionLabel, 0, 2);
       grid.add(questionText, 0, 3);
       grid.add(choiceLabel, 0, 4);
@@ -250,8 +268,15 @@ public class Main extends Application {
       EventHandler<MouseEvent> submitEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
+
+          // FIXME the eror stuff doesn't work yet.
+
           // Obtains the topic.
           String topic = topicText.getText();
+          // If user didn't enter a topic error screen prints.
+          if ((topic == null) || (topic.equals(""))) {
+            ErrorOccurred(primaryStage);
+          }
 
           // Creates the choice array.
           Choice[] choices = new Choice[4];
@@ -260,20 +285,57 @@ public class Main extends Application {
           choices[2] = new Choice(choiceThreeText.getText(), false);
           choices[3] = new Choice(choiceFourText.getText(), false);
 
+          // If user didn't enter a choice error screen prints.
+          for (int i = 0; i < choices.length; i++) {
+            if ((choices[i].getChoice() == null) || (choices[i].getChoice().equals(""))) {
+              ErrorOccurred(primaryStage);
+            }
+          }
+
           // Obtains the question
           String theQuestion = questionText.getText();
+          // If user didn't enter a topic error screen prints.
+          if ((theQuestion == null) || (theQuestion.equals(""))) {
+            ErrorOccurred(primaryStage);
+          }
 
           // Obtains the correct answer
           String answer = choices[0].getChoice();
 
-          Question question = new Question(topic, choices, theQuestion, answer);
+          // FIXME Need to find out how to obtain file string form the button and
+          // file chooser.
+          String image = "IMAGE STRING";
 
-          // FIXME Add quesiton to question data base
+          // FIXME passes in unused as default parameter becuase I dont understand metadata.
+          Question question = new Question(topic, choices, theQuestion, answer, image, "unused");
+
+
+
+          // FIXME Add question to question data base
           AddQuestionSuccess(primaryStage);
         }
       };
       // Registering the event filter
       submitButton.addEventFilter(MouseEvent.MOUSE_CLICKED, submitEventHandler);
+
+      // Creating the mouse event handler for going to computer's files.
+      EventHandler<MouseEvent> loadImageEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          FileChooser fileChooser = new FileChooser();
+          File file = fileChooser.showOpenDialog(primaryStage);
+          if (file != null) {
+            // title to let the user know their file was successfully added.
+            Label titleImage = new Label("Image Chosen.");
+            titleImage.setTextFill(Color.RED);
+            titleImage.setStyle("-fx-font: 18 arial;");
+            // Adds title to the screen.
+            grid.add(titleImage, 2, 3);
+          }
+        }
+      };
+      // Registering the event filter
+      loadImageButton.addEventFilter(MouseEvent.MOUSE_CLICKED, loadImageEventHandler);
 
 
     } catch (Exception e) {
@@ -398,7 +460,144 @@ public class Main extends Application {
     }
   }
 
+  /**
+   * This method is for when the user wishes to load questions from a JSON file.
+   * 
+   * @param primaryStage
+   */
+  public void loadJSON(Stage primaryStage) {
+    try {
+      // title to go on the loading JSON file page
+      Label title = new Label("Load Questions File");
+      title.setTextFill(Color.DARKGREEN);
+      title.setStyle("-fx-font: 18 arial;");
+
+      // button to go back home
+      Button loadFileButton = new Button();
+      loadFileButton.setText("Choose File");
+      loadFileButton.setTextFill(Color.DARKGREEN);
+      loadFileButton.setStyle("-fx-font: 18 arial;");
+
+
+
+      // button to go back home
+      Button homeButton = new Button();
+      homeButton.setText("Back to Home");
+      homeButton.setTextFill(Color.DARKGREEN);
+      homeButton.setStyle("-fx-font: 18 arial;");
+
+      GridPane grid = new GridPane();
+      grid.setAlignment(Pos.CENTER);
+      grid.setHgap(5);
+      grid.setVgap(5);
+      grid.setPadding(new Insets(25, 25, 25, 25));
+
+      grid.add(title, 0, 0);
+      grid.add(loadFileButton, 0, 1);
+      grid.add(homeButton, 2, 9);
+
+      Scene scene = new Scene(grid, 500, 300);
+      grid.setStyle("-fx-background-color: #f5f5dc");
+
+      // Adds the scene to the stage.
+      scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+      primaryStage.setScene(scene);
+      primaryStage.show();
+      primaryStage.setTitle("Load Questions From JSON");
+
+      // Creating the mouse event handler for going to computer's files.
+      EventHandler<MouseEvent> loadFileEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          FileChooser fileChooser = new FileChooser();
+          File file = fileChooser.showOpenDialog(primaryStage);
+          if (file != null) {
+
+            // FIXME We need to create a question database object and call load json stuff.
+
+            // title to let the user know their file was successfully added.
+            Label title1 = new Label("Questions Successfully Loaded.");
+            title1.setTextFill(Color.RED);
+            title1.setStyle("-fx-font: 18 arial;");
+            // Adds title to the screen.
+            grid.add(title1, 0, 2);
+          }
+        }
+      };
+      // Registering the event filter
+      loadFileButton.addEventFilter(MouseEvent.MOUSE_CLICKED, loadFileEventHandler);
+
+
+      // Creating the mouse event handler for going back to homepage
+      EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          start(primaryStage);
+        }
+      };
+      // Registering the event filter
+      homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
+
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * This is an error screen indicating an error occured in adding questions.
+   * 
+   * @param primaryStage
+   */
+  public void ErrorOccurred(Stage primaryStage) {
+
+    // title to go on the loading JSON file page
+    Label title = new Label("Error Occured!");
+    Label title1 = new Label("Please Try Again.");
+    title.setTextFill(Color.DARKGREEN);
+    title.setStyle("-fx-font: 25 arial;");
+    title1.setTextFill(Color.DARKGREEN);
+    title1.setStyle("-fx-font: 25 arial;");
+
+    // button to go back home
+    Button homeButton = new Button();
+    homeButton.setText("Back to Home");
+    homeButton.setTextFill(Color.DARKGREEN);
+    homeButton.setStyle("-fx-font: 18 arial;");
+
+    GridPane grid = new GridPane();
+    grid.setAlignment(Pos.CENTER);
+    grid.setHgap(5);
+    grid.setVgap(5);
+    grid.setPadding(new Insets(25, 25, 25, 25));
+
+    grid.add(title, 0, 0);
+    grid.add(title1, 0, 1);
+    grid.add(homeButton, 0, 2);
+
+    Scene scene = new Scene(grid, 500, 300);
+    grid.setStyle("-fx-background-color: #f5f5dc");
+
+    // Adds the scene to the stage.
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    primaryStage.setScene(scene);
+    primaryStage.show();
+    primaryStage.setTitle("Load Questions From JSON");
+
+    // Creating the mouse event handler for going back to homepage
+    EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        start(primaryStage);
+      }
+    };
+    // Registering the event filter
+    homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
+
+  }
+
   public static void main(String[] args) {
+
     launch(args);
   }
 }
