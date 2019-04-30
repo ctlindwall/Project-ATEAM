@@ -94,42 +94,40 @@ public class QuestionDatabase {
   public void saveQuestionsToJSON(File question)
       throws FileNotFoundException, IOException, ParseException {
     // creating JSONObject
-    JSONObject jo = new JSONObject();
+    JSONObject qa = new JSONObject();
 
     JSONArray ja = new JSONArray();
 
     for (String topic : observableTopics) {
       List<Question> questions = topics.get(topic);
-      Map m = new LinkedHashMap(5);
+      JSONObject qq = new JSONObject();
       for (Question q : questions) {
-        System.out.println("HI");
-        m.put("meta-data", q.getMetaData());
-        m.put("questionText", q.getQuestion());
-        m.put("topic", q.getTopic());
-        m.put("image", q.getImage());
+        qq = new JSONObject();
+        qq.put("meta-data", q.getMetaData());
+        qq.put("questionText", q.getQuestion());
+        qq.put("topic", q.getTopic());
+        qq.put("image", q.getImage());
 
         JSONArray choiceArray = new JSONArray();
 
-        System.out.println("HI2");
         Choice[] choices = q.getChoices();
-        Map choiceMap = new LinkedHashMap(2);
         for (Choice c : choices) {
-          choiceMap.put("isCorrect", c.getIsCorrect());
-          choiceMap.put("choice", c.getChoice());
+          JSONObject cc = new JSONObject();
+          cc.put("isCorrect", c.getIsCorrect());
+          cc.put("choice", c.getChoice());
+          choiceArray.add(cc);
         }
-
-        System.out.println("HI3");
-        choiceArray.add(m);
-        m.put("choiceArray", choiceArray);
+        qq.put("choiceArray", choiceArray);
       }
-      ja.add(m);
+      ja.add(qq);
     }
 
-    jo.put("questionArray", ja);
-    FileWriter fw = new FileWriter(question);
-    fw.write(jo.toJSONString());
-    fw.flush();
-    fw.close();
+    qa.put("questionArray", ja);
+    PrintWriter pw = new PrintWriter(question);
+    pw.write(qa.toJSONString());
+
+    pw.flush();
+    pw.close();
   }
 
   /**
