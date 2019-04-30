@@ -1,5 +1,3 @@
-package application;
-
 /**
  * The question class. Each question has a list of fields associated to it and this class allows for
  * the access of that information.
@@ -84,6 +82,11 @@ public class Question {
   public String getImage() {
     return image;
   }
-
-
+  
+  /**
+   * getter method for the metaData
+   */
+  public String getMetaData() {
+	  return metaData;
+  }
 }
