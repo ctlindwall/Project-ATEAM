@@ -3,6 +3,7 @@ package application;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -51,8 +52,8 @@ public class QuestionDatabase {
       // get the list of questions associated with the topic
       List<Question> topicQuestions = topics.get(topic);
       topicQuestions.add(question); // add new question to the list
-      topics.replace(topic, topicQuestions); // replace the topic key with the updated list of
-                                             // questions
+      // topics.replace(topic, topicQuestions); // replace the topic key with the updated list of
+      // questions
     } else { // topic is not in the hash map
       observableTopics.add(topic);
       List<Question> topicQuestions = new LinkedList<Question>(); // new linked list of questions
@@ -101,6 +102,7 @@ public class QuestionDatabase {
       List<Question> questions = topics.get(topic);
       Map m = new LinkedHashMap(5);
       for (Question q : questions) {
+        System.out.println("HI");
         m.put("meta-data", q.getMetaData());
         m.put("questionText", q.getQuestion());
         m.put("topic", q.getTopic());
@@ -108,12 +110,15 @@ public class QuestionDatabase {
 
         JSONArray choiceArray = new JSONArray();
 
+        System.out.println("HI2");
         Choice[] choices = q.getChoices();
-        Map choiceMap = new LinkedHashMap(5);
+        Map choiceMap = new LinkedHashMap(2);
         for (Choice c : choices) {
           choiceMap.put("isCorrect", c.getIsCorrect());
           choiceMap.put("choice", c.getChoice());
         }
+
+        System.out.println("HI3");
         choiceArray.add(m);
         m.put("choiceArray", choiceArray);
       }
@@ -121,10 +126,10 @@ public class QuestionDatabase {
     }
 
     jo.put("questionArray", ja);
-    PrintWriter pw = new PrintWriter(question);
-    pw.write(jo.toJSONString());
-
-    pw.close();
+    FileWriter fw = new FileWriter(question);
+    fw.write(jo.toJSONString());
+    fw.flush();
+    fw.close();
   }
 
   /**
@@ -191,12 +196,14 @@ public class QuestionDatabase {
 
       JSONArray questionChoices = (JSONArray) jsonQuestion.get("choiceArray"); // array for possible
                                                                                // choices
+      choices = new Choice[questionChoices.size()];
       for (int c = 0; c < questionChoices.size(); c++) { // for each choice
+
         JSONObject jsonChoice = (JSONObject) questionChoices.get(c);
         String isCorrect = (String) jsonChoice.get("isCorrect"); // saves if it is correct or not to
                                                                  // isCorrect variable
         String choice = (String) jsonChoice.get("choice"); // parse the string for the choice
-        choices = new Choice[questionChoices.size()];
+
         if (isCorrect.equals("T")) { // if correct answer
           correctAnswer = (String) jsonChoice.get("choice"); // should be only one correct answer
           Choice choiceObj = new Choice(choice, true); // create a new choice that is the correct
@@ -210,6 +217,7 @@ public class QuestionDatabase {
       }
       Question finishedQuestion =
           new Question(topic, choices, questionText, correctAnswer, image, metaData);
+      addQuestion(topic, finishedQuestion);
     }
   }
 
