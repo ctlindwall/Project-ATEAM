@@ -36,13 +36,12 @@ public class Main extends Application {
   @Override
   public void start(Stage primaryStage) {
 
+    // Data fields for when the quiz is occurring. 
     ArrayList<Question> questions = new ArrayList<Question>();
     Question currQuestion;
     int currQuestionNum;
     int totalNumQuestions;
     int numIncorrect;
-
-
 
     try {
       BorderPane root = new BorderPane();
@@ -76,9 +75,8 @@ public class Main extends Application {
       addButton.setTextFill(Color.DARKGREEN);
       addButton.setStyle("-fx-font: 18 arial;");
 
-      // FIXME we should look to see if javafx has a text field for ints so we dont
-      // have to worry about parsing faulty input.
-      // label and drop-down menu for number of questions - Turner
+      // Obtains the number ofquestions the user wishes for the quiz. If the input is anything
+      // other than a number the error page will appear. 
       Label numQuestions = new Label("Number of Questions:");
       numQuestions.setTextFill(Color.DARKGREEN);
       TextField numText = new TextField();
@@ -87,11 +85,11 @@ public class Main extends Application {
       Label quizTopic = new Label("Quiz Topic:");
       quizTopic.setTextFill(Color.DARKGREEN);
 
-      // FIXME Right here we should access the observable list within the question database
-      // class - Turner
+      // The Topic combo box, it accesses the list of topics from the question database class.
       ObservableList<String> topics = questionDB.getTopics();
       ComboBox<String> topicsBox = new ComboBox<String>(topics);
 
+      // Creates the grid that holds all of the buttons and text fields. 
       primaryStage.setTitle("Quiz Generator");
       GridPane grid = new GridPane();
       grid.setAlignment(Pos.CENTER);
@@ -99,6 +97,7 @@ public class Main extends Application {
       grid.setVgap(10);
       grid.setPadding(new Insets(25, 25, 25, 25));
 
+      // Adds all of the buttons and text boxes to the grid. 
       grid.add(title, 0, 0);
       grid.add(loadButton, 0, 1);
       GridPane.setMargin(loadButton, new Insets(5, 10, 5, 10));
@@ -112,7 +111,7 @@ public class Main extends Application {
       grid.add(numText, 2, 3);
       grid.add(createButton, 2, 5);
 
-
+      // Creates the scene. 
       Scene scene = new Scene(grid, 500, 300);
       grid.setStyle("-fx-background-color: #f5f5dc");
       scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
@@ -215,6 +214,7 @@ public class Main extends Application {
       TextField choiceTwoText = new TextField();
       TextField choiceThreeText = new TextField();
       TextField choiceFourText = new TextField();
+      TextField choiceFiveText = new TextField();
 
       // button to submit a question
       Button submitButton = new Button();
@@ -257,11 +257,12 @@ public class Main extends Application {
       grid.add(choiceTwoText, 0, 6);
       grid.add(choiceThreeText, 0, 7);
       grid.add(choiceFourText, 0, 8);
+      grid.add(choiceFiveText, 0, 9);
       grid.add(submitButton, 2, 7);
       grid.add(homeButton, 2, 8);
 
       // Creates the new scene.
-      Scene scene = new Scene(grid, 700, 400);
+      Scene scene = new Scene(grid, 700, 450);
       grid.setStyle("-fx-background-color: #f5f5dc");
 
       // Adds the scene to the stage.
@@ -294,11 +295,12 @@ public class Main extends Application {
           }
 
           // Creates the choice array.
-          Choice[] choices = new Choice[4];
+          Choice[] choices = new Choice[5];
           choices[0] = new Choice(choiceOneText.getText(), true);
           choices[1] = new Choice(choiceTwoText.getText(), false);
           choices[2] = new Choice(choiceThreeText.getText(), false);
           choices[3] = new Choice(choiceFourText.getText(), false);
+          choices[4] = new Choice(choiceFiveText.getText(), false);
 
           // If user didn't enter a choice error screen prints.
           for (int i = 0; i < choices.length; i++) {
@@ -326,7 +328,7 @@ public class Main extends Application {
             ErrorOccurred(primaryStage);
           } else {
             questionDB.addQuestion(topic, question);
-            AddQuestionSuccess(primaryStage);
+            AddQuestionSuccess(primaryStage, "Your Question Was", "Successfully Added!");
           }
         }
       };
@@ -364,15 +366,15 @@ public class Main extends Application {
    * 
    * @param primaryStage
    */
-  public void AddQuestionSuccess(Stage primaryStage) {
+  public void AddQuestionSuccess(Stage primaryStage, String phrase, String phrase2) {
 
     // title table to go in the top corner
-    Label title = new Label("Your Question Was");
+    Label title = new Label(phrase);
     title.setFont(Font.font("Verdana", 25));
     title.setTextFill(Color.DARKGREEN);
 
     // title table to go in the top corner
-    Label title2 = new Label("Successfully Added!");
+    Label title2 = new Label(phrase2);
     title2.setFont(Font.font("Verdana", 25));
     title2.setTextFill(Color.DARKGREEN);
 
