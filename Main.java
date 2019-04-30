@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.simple.parser.ParseException;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -34,20 +33,26 @@ import javafx.scene.text.Text;
 
 public class Main extends Application {
   private static QuestionDatabase questionDB;
+  private int num = 0;
 
   @Override
   public void start(Stage primaryStage) {
 
+    // Data fields for when the quiz is occurring.
     ArrayList<Question> questions = new ArrayList<Question>();
     Question currQuestion;
     int currQuestionNum;
     int totalNumQuestions;
     int numIncorrect;
 
-
-
     try {
       BorderPane root = new BorderPane();
+
+      // FIXME Add Irenes num questions method.
+      Label displayNumQs = new Label("Total Questions: " + "AH");
+      displayNumQs.setFont(Font.font("Verdana", 18));
+      displayNumQs.setTextFill(Color.DARKGREEN);
+
 
       // button to create quiz
       Button createButton = new Button();
@@ -78,9 +83,8 @@ public class Main extends Application {
       addButton.setTextFill(Color.DARKGREEN);
       addButton.setStyle("-fx-font: 18 arial;");
 
-      // FIXME we should look to see if javafx has a text field for ints so we dont
-      // have to worry about parsing faulty input.
-      // label and drop-down menu for number of questions - Turner
+      // Obtains the number ofquestions the user wishes for the quiz. If the input is anything
+      // other than a number the error page will appear.
       Label numQuestions = new Label("Number of Questions:");
       numQuestions.setTextFill(Color.DARKGREEN);
       TextField numText = new TextField();
@@ -89,11 +93,11 @@ public class Main extends Application {
       Label quizTopic = new Label("Quiz Topic:");
       quizTopic.setTextFill(Color.DARKGREEN);
 
-      // FIXME Right here we should access the observable list within the question database
-      // class - Turner
+      // The Topic combo box, it accesses the list of topics from the question database class.
       ObservableList<String> topics = questionDB.getTopics();
       ComboBox<String> topicsBox = new ComboBox<String>(topics);
 
+      // Creates the grid that holds all of the buttons and text fields.
       primaryStage.setTitle("Quiz Generator");
       GridPane grid = new GridPane();
       grid.setAlignment(Pos.CENTER);
@@ -101,6 +105,7 @@ public class Main extends Application {
       grid.setVgap(10);
       grid.setPadding(new Insets(25, 25, 25, 25));
 
+      // Adds all of the buttons and text boxes to the grid.
       grid.add(title, 0, 0);
       grid.add(loadButton, 0, 1);
       GridPane.setMargin(loadButton, new Insets(5, 10, 5, 10));
@@ -108,14 +113,15 @@ public class Main extends Application {
       GridPane.setMargin(addButton, new Insets(5, 10, 5, 10));
       grid.add(saveButton, 0, 2);
       grid.add(addButton, 0, 3);
-      grid.add(quizTopic, 2, 0);
-      grid.add(topicsBox, 2, 1);
-      grid.add(numQuestions, 2, 2);
-      grid.add(numText, 2, 3);
+      grid.add(displayNumQs, 2, 0);
+      grid.add(quizTopic, 2, 1);
+      grid.add(topicsBox, 2, 2);
+      grid.add(numQuestions, 2, 3);
+      grid.add(numText, 2, 4);
       grid.add(createButton, 2, 5);
 
-
-      Scene scene = new Scene(grid, 500, 300);
+      // Creates the scene.
+      Scene scene = new Scene(grid, 550, 350);
       grid.setStyle("-fx-background-color: #f5f5dc");
       scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
       primaryStage.setScene(scene);
@@ -137,14 +143,27 @@ public class Main extends Application {
         @Override
         public void handle(MouseEvent e) {
 
-          saveButton.setTextFill(Color.GREEN);
+          try {
+            // Creates file and adds questions to it.
+            String fileName = "questions-" + num;
+            File file = new File(fileName);
+            file.createNewFile();
+            questionDB.saveQuestionsToJSON(file);
+            // Increments field that differentiates the files made.
+            num++;
+            // successfully added file.
+            AddQuestionSuccess(primaryStage, "Sucessfullly Loaded", "Questions To JSON!");
+
+          } catch (Exception e1) {
+            // File was not correctly made.
+            ErrorOccurred(primaryStage);
+          }
         }
       };
       // Registering the event filter
       saveButton.addEventFilter(MouseEvent.MOUSE_CLICKED, saveEventHandler);
 
-      // FIXME
-      // Creating the mouse event handler for the Create Quiz button
+      // Creating the mouse event handler for the Create Quiz Button
       EventHandler<MouseEvent> createEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
@@ -173,7 +192,7 @@ public class Main extends Application {
       createButton.addEventFilter(MouseEvent.MOUSE_CLICKED, createEventHandler);
 
 
-      // Creating the mouse event handler for the Add Question Button
+      // Creating the mouse event handler for the load questions from json button
       EventHandler<MouseEvent> loadEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
@@ -217,6 +236,7 @@ public class Main extends Application {
       TextField choiceTwoText = new TextField();
       TextField choiceThreeText = new TextField();
       TextField choiceFourText = new TextField();
+      TextField choiceFiveText = new TextField();
 
       // button to submit a question
       Button submitButton = new Button();
@@ -240,6 +260,11 @@ public class Main extends Application {
       loadImageButton.setTextFill(Color.DARKGREEN);
       loadImageButton.setStyle("-fx-font: 18 arial;");
 
+      // Adds a text field and title for the user to enter the topic of the question.
+      Label metaDataLabel = new Label("MetaData:");
+      metaDataLabel.setTextFill(Color.DARKGREEN);
+      TextField metaDataText = new TextField();
+
       // Creates a grid to add the pieces to.
       GridPane grid = new GridPane();
       grid.setAlignment(Pos.CENTER);
@@ -251,6 +276,8 @@ public class Main extends Application {
       grid.add(topicText, 0, 1);
       grid.add(imageLabel, 2, 1);
       grid.add(loadImageButton, 2, 2);
+      grid.add(metaDataLabel, 2, 3);
+      grid.add(metaDataText, 2, 4);
       grid.add(questionLabel, 0, 2);
       grid.add(questionText, 0, 3);
       grid.add(choiceLabel, 0, 4);
@@ -259,11 +286,12 @@ public class Main extends Application {
       grid.add(choiceTwoText, 0, 6);
       grid.add(choiceThreeText, 0, 7);
       grid.add(choiceFourText, 0, 8);
+      grid.add(choiceFiveText, 0, 9);
       grid.add(submitButton, 2, 7);
       grid.add(homeButton, 2, 8);
 
       // Creates the new scene.
-      Scene scene = new Scene(grid, 700, 400);
+      Scene scene = new Scene(grid, 700, 450);
       grid.setStyle("-fx-background-color: #f5f5dc");
 
       // Adds the scene to the stage.
@@ -296,11 +324,12 @@ public class Main extends Application {
           }
 
           // Creates the choice array.
-          Choice[] choices = new Choice[4];
+          Choice[] choices = new Choice[5];
           choices[0] = new Choice(choiceOneText.getText(), true);
           choices[1] = new Choice(choiceTwoText.getText(), false);
           choices[2] = new Choice(choiceThreeText.getText(), false);
           choices[3] = new Choice(choiceFourText.getText(), false);
+          choices[4] = new Choice(choiceFiveText.getText(), false);
 
           // If user didn't enter a choice error screen prints.
           for (int i = 0; i < choices.length; i++) {
@@ -328,7 +357,7 @@ public class Main extends Application {
             ErrorOccurred(primaryStage);
           } else {
             questionDB.addQuestion(topic, question);
-            AddQuestionSuccess(primaryStage);
+            AddQuestionSuccess(primaryStage, "Your Question Was", "Successfully Added!");
           }
         }
       };
@@ -366,15 +395,15 @@ public class Main extends Application {
    * 
    * @param primaryStage
    */
-  public void AddQuestionSuccess(Stage primaryStage) {
+  public void AddQuestionSuccess(Stage primaryStage, String phrase, String phrase2) {
 
     // title table to go in the top corner
-    Label title = new Label("Your Question Was");
+    Label title = new Label(phrase);
     title.setFont(Font.font("Verdana", 25));
     title.setTextFill(Color.DARKGREEN);
 
     // title table to go in the top corner
-    Label title2 = new Label("Successfully Added!");
+    Label title2 = new Label(phrase2);
     title2.setFont(Font.font("Verdana", 25));
     title2.setTextFill(Color.DARKGREEN);
 
@@ -443,12 +472,14 @@ public class Main extends Application {
       homeButton.setTextFill(Color.DARKGREEN);
       homeButton.setStyle("-fx-font: 18 arial;");
 
+      // Creates the grid to put all the buttons and texts fields on
       GridPane grid = new GridPane();
       grid.setAlignment(Pos.CENTER);
       grid.setHgap(5);
       grid.setVgap(10);
       grid.setPadding(new Insets(25, 25, 25, 25));
 
+      // Adds them to the grid.
       grid.add(title, 0, 1);
       grid.add(submitButton, 1, 2);
       grid.add(homeButton, 1, 0);
@@ -471,17 +502,18 @@ public class Main extends Application {
       };
       // Registering the event filter
       homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
-      
+
+      // Comment
       EventHandler<MouseEvent> startQuizEventHandler = new EventHandler<MouseEvent>() {
-    	  @Override
-    	  public void handle(MouseEvent e) {
-    		  List<Question> allQuestionsList = QuestionDatabase.getQuestions(topic);
-    		  List<Question> quizQuestions = new ArrayList<Question>();
-    		  for (int i=0; i < numQuestions; i++) {
-    			  quizQuestions.add(allQuestionsList.get(i));
-    		  }
-    		  displayQuestion(primaryStage, quizQuestions);
-    	  }
+        @Override
+        public void handle(MouseEvent e) {
+          List<Question> allQuestionsList = questionDB.getQuestions(topic);
+          List<Question> quizQuestions = new ArrayList<Question>();
+          for (int i = 0; i < numQuestions; i++) {
+            quizQuestions.add(allQuestionsList.get(i));
+          }
+          displayQuestion(primaryStage, quizQuestions);
+        }
       };
       // Registering the event filer
       submitButton.addEventFilter(MouseEvent.MOUSE_CLICKED, startQuizEventHandler);
@@ -508,8 +540,6 @@ public class Main extends Application {
       loadFileButton.setText("Choose File");
       loadFileButton.setTextFill(Color.DARKGREEN);
       loadFileButton.setStyle("-fx-font: 18 arial;");
-
-
 
       // button to go back home
       Button homeButton = new Button();
@@ -578,7 +608,6 @@ public class Main extends Application {
       // Registering the event filter
       homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
-
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -635,58 +664,58 @@ public class Main extends Application {
     homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
   }
-  
+
   public void displayQuestion(Stage primaryStage, List<Question> quizQuestions) {
-	  GridPane grid = new GridPane();
-	    grid.setAlignment(Pos.CENTER);
-	    grid.setHgap(5);
-	    grid.setVgap(5);
-	    grid.setPadding(new Insets(25, 25, 25, 25));
-	  
-	  Scene scene = new Scene(grid, 500, 300);
-	    grid.setStyle("-fx-background-color: #f5f5dc");
+    GridPane grid = new GridPane();
+    grid.setAlignment(Pos.CENTER);
+    grid.setHgap(5);
+    grid.setVgap(5);
+    grid.setPadding(new Insets(25, 25, 25, 25));
+
+    Scene scene = new Scene(grid, 500, 300);
+    grid.setStyle("-fx-background-color: #f5f5dc");
 
 
-	    primaryStage.setTitle("Quiz");
-	    for (int i=0; i<quizQuestions.size();i++) {
-	    	Button nextButton = new Button("Next");
-	    	Button prevButton = new Button("Previous");
-	    	Label questionLabel = new Label("Question " + (i+1) + quizQuestions.get(i).getQuestion());
-	    	questionLabel.setTextFill(Color.DARKGREEN);
-	        questionLabel.setStyle("-fx-font: 18 arial;");
-	    	
-	    	
-	    	Button answer1 = new Button(quizQuestions.get(i).getChoices()[0].getChoice());
-	    	answer1.setTextFill(Color.DARKGREEN);
-	    	answer1.setStyle("-fx-font: 18 arial;");
-	    	
-	    	Button answer2 = new Button(quizQuestions.get(i).getChoices()[1].getChoice());
-	    	answer2.setTextFill(Color.DARKGREEN);
-	    	answer2.setStyle("-fx-font: 18 arial;");
-	    	
-	    	Button answer3 = new Button(quizQuestions.get(i).getChoices()[2].getChoice());
-	    	answer3.setTextFill(Color.DARKGREEN);
-	    	answer3.setStyle("-fx-font: 18 arial;");
-	    	
-	    	Button answer4 = new Button(quizQuestions.get(i).getChoices()[3].getChoice());
-	    	answer4.setTextFill(Color.DARKGREEN);
-	    	answer4.setStyle("-fx-font: 18 arial;");
-	    	
-	    	
-	    	grid.add(nextButton, 3, 4);
-	    	grid.add(prevButton, 0, 4);
-	    	grid.add(questionLabel, 1, 0);
-	    	grid.add(answer1, 1, 2);
-	    	grid.add(answer2, 2, 2);
-	    	grid.add(answer3, 1, 3);
-	    	grid.add(answer4, 2, 3);
-	    	
-	    	
-	    }
-	    // Adds the scene to the stage.
-	    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-	    primaryStage.setScene(scene);
-	    primaryStage.show();
+    primaryStage.setTitle("Quiz");
+    for (int i = 0; i < quizQuestions.size(); i++) {
+      Button nextButton = new Button("Next");
+      Button prevButton = new Button("Previous");
+      Label questionLabel = new Label("Question " + (i + 1) + quizQuestions.get(i).getQuestion());
+      questionLabel.setTextFill(Color.DARKGREEN);
+      questionLabel.setStyle("-fx-font: 18 arial;");
+
+
+      Button answer1 = new Button(quizQuestions.get(i).getChoices()[0].getChoice());
+      answer1.setTextFill(Color.DARKGREEN);
+      answer1.setStyle("-fx-font: 18 arial;");
+
+      Button answer2 = new Button(quizQuestions.get(i).getChoices()[1].getChoice());
+      answer2.setTextFill(Color.DARKGREEN);
+      answer2.setStyle("-fx-font: 18 arial;");
+
+      Button answer3 = new Button(quizQuestions.get(i).getChoices()[2].getChoice());
+      answer3.setTextFill(Color.DARKGREEN);
+      answer3.setStyle("-fx-font: 18 arial;");
+
+      Button answer4 = new Button(quizQuestions.get(i).getChoices()[3].getChoice());
+      answer4.setTextFill(Color.DARKGREEN);
+      answer4.setStyle("-fx-font: 18 arial;");
+
+
+      grid.add(nextButton, 3, 4);
+      grid.add(prevButton, 0, 4);
+      grid.add(questionLabel, 1, 0);
+      grid.add(answer1, 1, 2);
+      grid.add(answer2, 2, 2);
+      grid.add(answer3, 1, 3);
+      grid.add(answer4, 2, 3);
+
+
+    }
+    // Adds the scene to the stage.
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    primaryStage.setScene(scene);
+    primaryStage.show();
   }
 
   public static void main(String[] args) {
