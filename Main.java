@@ -32,11 +32,12 @@ import javafx.scene.text.Text;
 
 public class Main extends Application {
   private static QuestionDatabase questionDB;
+  private int num = 0;
 
   @Override
   public void start(Stage primaryStage) {
 
-    // Data fields for when the quiz is occurring. 
+    // Data fields for when the quiz is occurring.
     ArrayList<Question> questions = new ArrayList<Question>();
     Question currQuestion;
     int currQuestionNum;
@@ -76,7 +77,7 @@ public class Main extends Application {
       addButton.setStyle("-fx-font: 18 arial;");
 
       // Obtains the number ofquestions the user wishes for the quiz. If the input is anything
-      // other than a number the error page will appear. 
+      // other than a number the error page will appear.
       Label numQuestions = new Label("Number of Questions:");
       numQuestions.setTextFill(Color.DARKGREEN);
       TextField numText = new TextField();
@@ -89,7 +90,7 @@ public class Main extends Application {
       ObservableList<String> topics = questionDB.getTopics();
       ComboBox<String> topicsBox = new ComboBox<String>(topics);
 
-      // Creates the grid that holds all of the buttons and text fields. 
+      // Creates the grid that holds all of the buttons and text fields.
       primaryStage.setTitle("Quiz Generator");
       GridPane grid = new GridPane();
       grid.setAlignment(Pos.CENTER);
@@ -97,7 +98,7 @@ public class Main extends Application {
       grid.setVgap(10);
       grid.setPadding(new Insets(25, 25, 25, 25));
 
-      // Adds all of the buttons and text boxes to the grid. 
+      // Adds all of the buttons and text boxes to the grid.
       grid.add(title, 0, 0);
       grid.add(loadButton, 0, 1);
       GridPane.setMargin(loadButton, new Insets(5, 10, 5, 10));
@@ -111,7 +112,7 @@ public class Main extends Application {
       grid.add(numText, 2, 3);
       grid.add(createButton, 2, 5);
 
-      // Creates the scene. 
+      // Creates the scene.
       Scene scene = new Scene(grid, 500, 300);
       grid.setStyle("-fx-background-color: #f5f5dc");
       scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
@@ -135,6 +136,19 @@ public class Main extends Application {
         public void handle(MouseEvent e) {
 
           saveButton.setTextFill(Color.GREEN);
+
+          try {
+            String fileName = "questions-" + num;
+            File file = new File(fileName);
+            file.createNewFile();
+            questionDB.saveQuestionsToJSON(file);
+            num++;
+
+            AddQuestionSuccess(primaryStage, "Sucessfullly loaded", "questions to JSON");
+
+          } catch (Exception e1) {
+            ErrorOccurred(primaryStage);
+          }
         }
       };
       // Registering the event filter
