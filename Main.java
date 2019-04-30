@@ -135,18 +135,19 @@ public class Main extends Application {
         @Override
         public void handle(MouseEvent e) {
 
-          saveButton.setTextFill(Color.GREEN);
-
           try {
+            // Creates file and adds questions to it.
             String fileName = "questions-" + num;
             File file = new File(fileName);
             file.createNewFile();
             questionDB.saveQuestionsToJSON(file);
+            // Increments field that differentiates the files made.
             num++;
-
-            AddQuestionSuccess(primaryStage, "Sucessfullly loaded", "questions to JSON");
+            // successfully added file.
+            AddQuestionSuccess(primaryStage, "Sucessfullly loaded", "questions to JSON!");
 
           } catch (Exception e1) {
+            // File was not correctly made.
             ErrorOccurred(primaryStage);
           }
         }
@@ -154,8 +155,7 @@ public class Main extends Application {
       // Registering the event filter
       saveButton.addEventFilter(MouseEvent.MOUSE_CLICKED, saveEventHandler);
 
-      // FIXME
-      // Creating the mouse event handler for the Add Question Button
+      // Creating the mouse event handler for the Create Quiz Button
       EventHandler<MouseEvent> createEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
@@ -184,7 +184,7 @@ public class Main extends Application {
       createButton.addEventFilter(MouseEvent.MOUSE_CLICKED, createEventHandler);
 
 
-      // Creating the mouse event handler for the Add Question Button
+      // Creating the mouse event handler for the load questions from json button
       EventHandler<MouseEvent> loadEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
@@ -457,12 +457,14 @@ public class Main extends Application {
       homeButton.setTextFill(Color.DARKGREEN);
       homeButton.setStyle("-fx-font: 18 arial;");
 
+      // Creates the grid to put all the buttons and texts fields on
       GridPane grid = new GridPane();
       grid.setAlignment(Pos.CENTER);
       grid.setHgap(5);
       grid.setVgap(10);
       grid.setPadding(new Insets(25, 25, 25, 25));
 
+      // Adds them to the grid.
       grid.add(title, 0, 1);
       grid.add(submitButton, 1, 2);
       grid.add(homeButton, 1, 0);
@@ -486,6 +488,16 @@ public class Main extends Application {
       // Registering the event filter
       homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
+      // Creating the mouse event handler for going back to homepage
+      EventHandler<MouseEvent> submitEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          ;
+        }
+      };
+      // Registering the event filter
+      submitButton.addEventFilter(MouseEvent.MOUSE_CLICKED, submitEventHandler);
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -508,8 +520,6 @@ public class Main extends Application {
       loadFileButton.setText("Choose File");
       loadFileButton.setTextFill(Color.DARKGREEN);
       loadFileButton.setStyle("-fx-font: 18 arial;");
-
-
 
       // button to go back home
       Button homeButton = new Button();
@@ -578,7 +588,6 @@ public class Main extends Application {
       // Registering the event filter
       homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
-
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -635,6 +644,7 @@ public class Main extends Application {
     homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
   }
+
 
   public static void main(String[] args) {
     questionDB = new QuestionDatabase();
