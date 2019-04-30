@@ -1,7 +1,10 @@
 package application;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import org.json.simple.parser.ParseException;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -28,6 +31,8 @@ import javafx.scene.text.Text;
 
 
 public class Main extends Application {
+  private static QuestionDatabase questionDB;
+
   @Override
   public void start(Stage primaryStage) {
 
@@ -84,8 +89,7 @@ public class Main extends Application {
 
       // FIXME Right here we should access the observable list within the question database
       // class - Turner
-      ObservableList<String> topics =
-          FXCollections.observableArrayList("math", "science", "english");
+      ObservableList<String> topics = questionDB.getTopics();
       ComboBox<String> topicsBox = new ComboBox<String>(topics);
 
       primaryStage.setTitle("Quiz Generator");
@@ -142,13 +146,25 @@ public class Main extends Application {
       EventHandler<MouseEvent> createEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
-          // FIXME we need to fix this parsing it doesn't work. we need to look into
-          // how to obtain the number entered.
-          int numQuestions = Integer.parseInt(numText.getText());
-          // must figure out how to pull quiz topic from combo box
-          String topic = "howdy";
-
-          displayQuiz(primaryStage, numQuestions, topic);
+          // Obtains number from text field. If the input is not a number, it will print the
+          // error screen.
+          try {
+            boolean error = false;
+            int numQuestions = Integer.parseInt(numText.getText());
+            // Obtains quiz topic chosen.
+            String topic = topicsBox.getValue();
+            if ((topic == null) || (topic.equals(""))) {
+              error = true;
+            }
+            // Calls the display quiz page if no errors
+            if (error) {
+              ErrorOccurred(primaryStage);
+            } else {
+              displayQuiz(primaryStage, numQuestions, topic);
+            }
+          } catch (NumberFormatException n) {
+            ErrorOccurred(primaryStage);
+          }
         }
       };
       // Registering the event filter
@@ -306,13 +322,11 @@ public class Main extends Application {
           // FIXME passes in unused as default parameter becuase I dont understand metadata.
           Question question = new Question(topic, choices, theQuestion, answer, image, "unused");
 
-
-
-          // FIXME Add question to question data base
           if (error) {
-          ErrorOccurred(primaryStage);
+            ErrorOccurred(primaryStage);
           } else {
-          AddQuestionSuccess(primaryStage);
+            questionDB.addQuestion(topic, question);
+            AddQuestionSuccess(primaryStage);
           }
         }
       };
@@ -338,7 +352,6 @@ public class Main extends Application {
       };
       // Registering the event filter
       loadImageButton.addEventFilter(MouseEvent.MOUSE_CLICKED, loadImageEventHandler);
-
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -515,7 +528,16 @@ public class Main extends Application {
           File file = fileChooser.showOpenDialog(primaryStage);
           if (file != null) {
             loadFileButton.setText(file.getName());
-            // FIXME We need to create a question database object and call load json stuff.
+            // Obtains the questions from the JSON file and saves them from the Database.
+            try {
+              questionDB.loadQuestionsFromJSON(file);
+            } catch (ParseException p) {
+              p.printStackTrace();
+            } catch (FileNotFoundException f) {
+              f.printStackTrace();
+            } catch (IOException i) {
+              i.printStackTrace();
+            }
 
             // title to let the user know their file was successfully added.
             Label title1 = new Label("Questions Successfully Loaded.");
@@ -599,7 +621,7 @@ public class Main extends Application {
   }
 
   public static void main(String[] args) {
-
+    questionDB = new QuestionDatabase();
     launch(args);
   }
 }
