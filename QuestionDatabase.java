@@ -28,13 +28,14 @@ import javafx.collections.ObservableList;
  */
 public class QuestionDatabase {
   private Map<String, List<Question>> topics; // hash map with all the topics and questions
-  private ObservableList<String> observableTopics;
-  private int totalQuestions;
+  private ObservableList<String> observableTopics; // observable list for all the topics
+  private int totalQuestions; // total number of questions in the database
 
   /**
    * Default constructor
    */
   public QuestionDatabase() {
+    // FIXME might need to account for resizing probs is ok tho
     topics = new HashMap<String, List<Question>>(20);
     observableTopics = FXCollections.observableArrayList();
     totalQuestions = 0;
@@ -61,7 +62,7 @@ public class QuestionDatabase {
       topics.put(topic, topicQuestions); // add the new topic and question to the hash map
     }
 
-    totalQuestions++;
+    totalQuestions++; // after adding the a question increase the count for total questions
   }
 
   /**
@@ -71,6 +72,8 @@ public class QuestionDatabase {
    * @return num the number of questions for a topic, will return 0 if topic does not exist
    */
   public int getNumQuestions(String topic) {
+    // FIXME not sure if we need this anymore -Irene
+
     int numQuestions = 0;
     if (topics.containsKey(topic)) { // check if topic is contained in hashmap
       List<Question> topicQuestions = topics.get(topic);
@@ -80,11 +83,14 @@ public class QuestionDatabase {
     return numQuestions; // returns number of questions
   }
 
+  /**
+   * This method returns the number of all the questions that are in the database
+   * 
+   * @return totalQuestions the total number of questions
+   */
   public int getNumAllQuestions() {
     return totalQuestions;
   }
-
-  // FIXME need a number of total questions
 
   /**
    * This saves the given question file to a json file
@@ -93,6 +99,8 @@ public class QuestionDatabase {
    */
   public void saveQuestionsToJSON(File question)
       throws FileNotFoundException, IOException, ParseException {
+    // FIXME needs to me commented
+
     // creating JSONObject
     JSONObject qa = new JSONObject();
 
@@ -137,31 +145,40 @@ public class QuestionDatabase {
    * @return questionList a list of questions for the given topic, null if topic does not exist
    */
   public List<Question> getQuestions(String topic) {
+    // FIXME not sure if we need this anymore -Irene
+
     List<Question> topicQuestions = null;
 
     if (topics.containsKey(topic)) {
       topicQuestions = topics.get(topic); // get the questions for the specific topic
     }
 
-    return topicQuestions;
+    return topicQuestions; // list of all the questions from that topic
   }
 
 
   /**
-   * Randomized the topics in a specific topic
+   * Randomizes the questions in a specific topic. Then returns them as a linked list to be used to
+   * display the quiz.
    * 
-   * @param topic
-   * @return
+   * @param topic the topic that the user requested the questions from
+   * @return topicQuestionsLinked the questions for the topic in a randomized linked list
    */
   public List<Question> getQuestionsRandom(String topic) {
-    List<Question> topicQuestions = null;
+    List<Question> topicQuestions = null; // list of questions from the hash map
+    List<Question> topicQuestionsLinked = new LinkedList<Question>(); // linked list to be returned
 
     if (topics.containsKey(topic)) {
       topicQuestions = topics.get(topic); // get the questions for the specific topic
-      Collections.shuffle(topicQuestions);
+      Collections.shuffle(topicQuestions); // randomize the list of questions
     }
 
-    return topicQuestions;
+    for (int i = 0; i < topicQuestions.size(); i++) { // add each element from the array list to a
+                                                      // linked list
+      topicQuestionsLinked.add(topicQuestions.get(i));
+    }
+
+    return topicQuestionsLinked; // returned the randomizes linked list
   }
 
   /**
