@@ -1,5 +1,3 @@
-package application;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,22 +31,23 @@ import javafx.scene.text.Text;
 
 public class Main extends Application {
   private static QuestionDatabase questionDB;
-  // Data fields for when the quiz is occurring.
-  private ArrayList<Question> questions = new ArrayList<Question>();
-  private Question currQuestion;
-  private int currQuestionNum;
-  private int totalNumQuestions;
-  private int numIncorrect;
-  private int numQuestionsAnswered;
+  private int num = 0;
 
   @Override
   public void start(Stage primaryStage) {
 
+    // Data fields for when the quiz is occurring.
+    ArrayList<Question> questions = new ArrayList<Question>();
+    Question currQuestion;
+    int currQuestionNum;
+    int totalNumQuestions;
+    int numIncorrect;
+
     try {
       BorderPane root = new BorderPane();
 
-      // displays total number of questions
-      Label displayNumQs = new Label("Total Questions: " + questionDB.getNumAllQuestions());
+      // FIXME Add Irenes num questions method.
+      Label displayNumQs = new Label("Total Questions: " + "AH");
       displayNumQs.setFont(Font.font("Verdana", 18));
       displayNumQs.setTextFill(Color.DARKGREEN);
 
@@ -143,7 +142,15 @@ public class Main extends Application {
         public void handle(MouseEvent e) {
 
           try {
-            saveJSON(primaryStage);
+            // Creates file and adds questions to it.
+            String fileName = "questions-" + num + ".json";
+            File file = new File(fileName);
+            file.createNewFile();
+            questionDB.saveQuestionsToJSON(file);
+            // Increments field that differentiates the files made.
+            num++;
+            // successfully added file.
+            AddQuestionSuccess(primaryStage, "Sucessfullly Loaded", "Questions To JSON!");
 
           } catch (Exception e1) {
             // File was not correctly made.
@@ -240,6 +247,7 @@ public class Main extends Application {
       homeButton.setText("Back to Home");
       homeButton.setTextFill(Color.DARKGREEN);
       homeButton.setStyle("-fx-font: 18 arial;");
+
 
       // Adds a text field for the user to enter a question
       Label imageLabel = new Label("Image File:");
@@ -497,16 +505,14 @@ public class Main extends Application {
       EventHandler<MouseEvent> startQuizEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
-          List<Question> allQuestionsList = questionDB.getQuestions(topic);
           List<Question> quizQuestions = new ArrayList<Question>();
-          // FIXME random method?
-          for (int i = 0; i < numQuestions; i++) {
-            quizQuestions.add(allQuestionsList.get(i));
-          }
-          totalNumQuestions = quizQuestions.size();
-          currQuestionNum = 0;
-          numQuestionsAnswered = 0;
-          numIncorrect = 0;
+          
+          if(numQuestions > questionDB.getNumQuestions(topic)) 
+        	  quizQuestions = questionDB.getQuestionsRandom(topic, questionDB.getNumQuestions(topic));
+          
+          else 
+        	  quizQuestions = questionDB.getQuestionsRandom(topic, numQuestions);
+          
           displayQuestion(primaryStage, quizQuestions);
         }
       };
@@ -608,105 +614,6 @@ public class Main extends Application {
     }
   }
 
-  public void saveJSON(Stage primaryStage) {
-    try {
-      // title to go on the save JSON file page
-      Label title = new Label("Save Questions To File");
-      title.setTextFill(Color.DARKGREEN);
-      title.setStyle("-fx-font: 18 arial;");
-
-      // button to go back home
-      Button homeButton = new Button();
-      homeButton.setText("Back to Home");
-      homeButton.setTextFill(Color.DARKGREEN);
-      homeButton.setStyle("-fx-font: 18 arial;");
-
-      // text field for file name
-      Label fileNameLabel = new Label("Choose name for new file:");
-      fileNameLabel.setTextFill(Color.DARKGREEN);
-      TextField fileText = new TextField();
-
-      // instructions for file name
-      Label fileNameGuidlines = new Label("*file name can't include: | / \\ \" : ? * < >");
-      fileNameGuidlines.setTextFill(Color.RED);
-
-      // button to save file
-      Button saveFile = new Button();
-      saveFile.setText("Save file");
-      saveFile.setTextFill(Color.DARKGREEN);
-      saveFile.setStyle("-fx-font: 18 arial;");
-
-      // create grid
-      GridPane grid = new GridPane();
-      grid.setAlignment(Pos.CENTER);
-      grid.setHgap(5);
-      grid.setVgap(5);
-      grid.setPadding(new Insets(25, 25, 25, 25));
-
-      // add elements to the grid
-      grid.add(title, 0, 0);
-      grid.add(fileNameLabel, 0, 2);
-      grid.add(fileText, 0, 4);
-      grid.add(fileNameGuidlines, 2, 4);
-      grid.add(saveFile, 0, 9);
-      grid.add(homeButton, 2, 9);
-
-      Scene scene = new Scene(grid, 500, 300);
-      grid.setStyle("-fx-background-color: #f5f5dc");
-
-      // Adds the scene to the stage.
-      scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-      primaryStage.setScene(scene);
-      primaryStage.show();
-      primaryStage.setTitle("Save Questions To JSON");
-
-      EventHandler<MouseEvent> saveFileEventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-          String name = fileText.getText();
-
-          if (name == "") { // text field cannot be empty
-            ErrorOccurred(primaryStage);
-          } else if (questionDB.getNumAllQuestions() == 0) {
-            // no questions in database
-            ErrorOccurred(primaryStage);
-          } else {
-
-
-            try {
-              File file = new File(name); // create file with the name the user entered
-              // file.createNewFile();
-              questionDB.saveQuestionsToJSON(file);
-
-              // successfully added file.
-              AddQuestionSuccess(primaryStage, "Successfullly Loaded", "Questions To JSON!");
-
-            } catch (Exception e1) {
-              ErrorOccurred(primaryStage);
-            }
-          }
-        }
-
-      };
-      // Registering the event filter
-      saveFile.addEventFilter(MouseEvent.MOUSE_CLICKED, saveFileEventHandler);
-
-      // Creating the mouse event handler for going back to homepage
-      EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-          start(primaryStage);
-        }
-      };
-      // Registering the event filter
-      homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      ErrorOccurred(primaryStage);
-    }
-  }
-
   /**
    * This is an error screen indicating an error occured in adding questions.
    * 
@@ -759,13 +666,6 @@ public class Main extends Application {
 
   }
 
-  /**
-   * This method is the display screen for a given quiz question. it will for loop each question the
-   * number of questions that the user requested.
-   * 
-   * @param primaryStage
-   * @param quizQuestions
-   */
   public void displayQuestion(Stage primaryStage, List<Question> quizQuestions) {
     GridPane grid = new GridPane();
     grid.setAlignment(Pos.CENTER);
@@ -776,38 +676,15 @@ public class Main extends Application {
     Scene scene = new Scene(grid, 500, 300);
     grid.setStyle("-fx-background-color: #f5f5dc");
 
+
     primaryStage.setTitle("Quiz");
-
-    for (int i = 0; i < totalNumQuestions; i++) {
-      // Correct Label
-      Label correct = new Label("Correct");
-      correct.setTextFill(Color.GREEN);
-      correct.setStyle("-fx-font: 18 arial;");
-
-      // Correct Label
-      Label incorrect = new Label("Incorrect");
-      incorrect.setTextFill(Color.RED);
-      incorrect.setStyle("-fx-font: 18 arial;");
-
-      // Results Button.
-      Button results = new Button("Results");
-      results.setTextFill(Color.DARKGREEN);
-      results.setStyle("-fx-font: 18 arial;");
-
-      // FIXME include this.
-      // Tells the user what question they are on.
-      Label currQuestion = new Label("Current Question: " + (i + 1) + "/" + totalNumQuestions);
-      currQuestion.setTextFill(Color.DARKGREEN);
-      currQuestion.setStyle("-fx-font: 18 arial;");
-
-      // Button to take the user to the next question.
+    for (int i = 0; i < quizQuestions.size(); i++) {
       Button nextButton = new Button("Next");
-      Label questionLabel =
-          new Label("Question " + (currQuestionNum + 1) + quizQuestions.get(i).getQuestion());
+      Label questionLabel = new Label("Question " + (i + 1) + ". " + quizQuestions.get(i).getQuestion());
       questionLabel.setTextFill(Color.DARKGREEN);
       questionLabel.setStyle("-fx-font: 18 arial;");
 
-      // These buttons are for the choices.
+
       Button answer1 = new Button(quizQuestions.get(i).getChoices()[0].getChoice());
       answer1.setTextFill(Color.DARKGREEN);
       answer1.setStyle("-fx-font: 18 arial;");
@@ -824,6 +701,7 @@ public class Main extends Application {
       answer4.setTextFill(Color.DARKGREEN);
       answer4.setStyle("-fx-font: 18 arial;");
 
+
       grid.add(nextButton, 3, 4);
       grid.add(questionLabel, 1, 0);
       grid.add(answer1, 1, 2);
@@ -831,194 +709,12 @@ public class Main extends Application {
       grid.add(answer3, 1, 3);
       grid.add(answer4, 2, 3);
 
-      // Displays button to end quiz and show results if all questions have been answered.
-      if (numQuestionsAnswered == totalNumQuestions) {
-        // FIXME Add this to grid
-        // grid.add(results, 0, 0);
-      }
 
-      // Creating the mouse event to show results.
-      EventHandler<MouseEvent> answer1EventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-          if (quizQuestions.get(currQuestionNum).getChoices()[0].getIsCorrect()) {
-            // FIXME correct add to page
-            // grid.add(correct, 0, 0);
-
-          } else {
-            // FIXME display incorrect
-            // grid.add(incorrect, 0, 0);
-            numIncorrect++;
-          }
-          numQuestionsAnswered++;
-          grid.add(nextButton, 3, 4);
-        }
-      };
-      // Registering the event filter
-      answer1.addEventFilter(MouseEvent.MOUSE_CLICKED, answer1EventHandler);
-
-      // Creating the mouse event to show results.
-      EventHandler<MouseEvent> answer2EventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-          if (quizQuestions.get(currQuestionNum).getChoices()[1].getIsCorrect()) {
-            // FIXME correct add to page
-            // grid.add(correct, 0, 0);
-
-          } else {
-            // FIXME display incorrect
-            // grid.add(incorrect, 0, 0);
-            numIncorrect++;
-          }
-          numQuestionsAnswered++;
-          grid.add(nextButton, 3, 4);
-        }
-      };
-      // Registering the event filter
-      answer2.addEventFilter(MouseEvent.MOUSE_CLICKED, answer2EventHandler);
-
-      // Creating the mouse event to show results.
-      EventHandler<MouseEvent> answer3EventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-          if (quizQuestions.get(currQuestionNum).getChoices()[2].getIsCorrect()) {
-            // FIXME correct add to page
-            // grid.add(correct, 0, 0);
-
-          } else {
-            // FIXME display incorrect
-            // grid.add(incorrect, 0, 0);
-            numIncorrect++;
-          }
-          numQuestionsAnswered++;
-          grid.add(nextButton, 3, 4);
-        }
-      };
-      // Registering the event filter
-      answer3.addEventFilter(MouseEvent.MOUSE_CLICKED, answer3EventHandler);
-
-      // Creating the mouse event to show results.
-      EventHandler<MouseEvent> answer4EventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-          if (quizQuestions.get(currQuestionNum).getChoices()[3].getIsCorrect()) {
-            // FIXME correct add to page
-            // grid.add(correct, 0, 0);
-
-          } else {
-            // FIXME display incorrect
-            // grid.add(incorrect, 0, 0);
-            numIncorrect++;
-          }
-          numQuestionsAnswered++;
-          grid.add(nextButton, 3, 4);
-        }
-      };
-      // Registering the event filter
-      answer4.addEventFilter(MouseEvent.MOUSE_CLICKED, answer4EventHandler);
-
-
-      // Creating the mouse event handler that goes to next question.
-      EventHandler<MouseEvent> nextEventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-          currQuestionNum++;
-          displayQuestion(primaryStage, quizQuestions);
-        }
-      };
-      // Registering the event filter
-      nextButton.addEventFilter(MouseEvent.MOUSE_CLICKED, nextEventHandler);
-
-      // Creating the mouse event to show results.
-      EventHandler<MouseEvent> resultsEventHandler = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent e) {
-          // FIXME Go to results page. (finished quiz)
-        }
-      };
-      // Registering the event filter
-      results.addEventFilter(MouseEvent.MOUSE_CLICKED, resultsEventHandler);
-
-
-      // Adds the scene to the stage.
-      scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-      primaryStage.setScene(scene);
-      primaryStage.show();
     }
-  }
-
-  /**
-   * This method presents a new stage that will tell the user the final results of the quiz. It will
-   * display the score and give the user the option to take it again or go back to the main page.
-   * 
-   * @param primaryStage
-   * @param numRight
-   * @param totalNumQuestions
-   */
-  public void finishedQuiz(Stage primaryStage, int numRight, int totalNumQuestions) {
-    GridPane grid = new GridPane();
-    grid.setAlignment(Pos.CENTER);
-    grid.setHgap(5);
-    grid.setVgap(5);
-    grid.setPadding(new Insets(25, 25, 25, 25));
-
-    Scene scene = new Scene(grid, 500, 300);
-    grid.setStyle("-fx-background-color: #f5f5dc");
-
-    // title to go on the save JSON file page
-    Label title = new Label("Final Score:");
-    title.setTextFill(Color.DARKGREEN);
-    title.setStyle("-fx-font: 26 arial;");
-
-    // label for the score
-    Label score = new Label(numRight + "/" + totalNumQuestions);
-    score.setTextFill(Color.LIGHTSLATEGREY);
-    score.setStyle("-fx-font: 26 arial;");
-
-
-    // button to go back home
-    Button homeButton = new Button();
-    homeButton.setText("Back to Home");
-    homeButton.setTextFill(Color.DARKGREEN);
-    homeButton.setStyle("-fx-font: 18 arial;");
-
-    // button to take again home
-    Button retakeQuizButton = new Button();
-    retakeQuizButton.setText("Take Quiz Again");
-    retakeQuizButton.setTextFill(Color.DARKGREEN);
-    retakeQuizButton.setStyle("-fx-font: 18 arial;");
-
-    // add elements to the grid
-    grid.add(title, 0, 0);
-    grid.add(score, 1, 0);
-    grid.add(homeButton, 2, 9);
-    grid.add(retakeQuizButton, 0, 9);
-
     // Adds the scene to the stage.
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
-
-    EventHandler<MouseEvent> reStartQuizEventHandler = new EventHandler<MouseEvent>() {
-      @Override
-      public void handle(MouseEvent e) {
-        // FIXME restart quiz not sure how that part of the code functions yet
-        // also probs not needed if its difficult to implement
-        // displayQuestion(primaryStage);
-      }
-    };
-    retakeQuizButton.addEventFilter(MouseEvent.MOUSE_CLICKED, reStartQuizEventHandler);
-
-    // Creating the mouse event handler for going back to homepage
-    EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
-      @Override
-      public void handle(MouseEvent e) {
-        start(primaryStage);
-      }
-    };
-    // Registering the event filter
-    homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
-
   }
 
   public static void main(String[] args) {

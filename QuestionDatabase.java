@@ -163,9 +163,10 @@ public class QuestionDatabase {
    * display the quiz.
    * 
    * @param topic the topic that the user requested the questions from
+   * @param numQuestions the number of questions that the user requested for the quiz
    * @return topicQuestionsLinked the questions for the topic in a randomized linked list
    */
-  public List<Question> getQuestionsRandom(String topic) {
+  public List<Question> getQuestionsRandom(String topic, int numQuestions) {
     List<Question> topicQuestions = null; // list of questions from the hash map
     List<Question> topicQuestionsLinked = new LinkedList<Question>(); // linked list to be returned
 
@@ -174,7 +175,7 @@ public class QuestionDatabase {
       Collections.shuffle(topicQuestions); // randomize the list of questions
     }
 
-    for (int i = 0; i < topicQuestions.size(); i++) { // add each element from the array list to a
+    for (int i = 0; i < numQuestions; i++) { // add each element from the array list to a
                                                       // linked list
       topicQuestionsLinked.add(topicQuestions.get(i));
     }
