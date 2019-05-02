@@ -33,7 +33,6 @@ import javafx.scene.text.Text;
 
 public class Main extends Application {
   private static QuestionDatabase questionDB;
-  private int num = 0;
   // Data fields for when the quiz is occurring.
   private ArrayList<Question> questions = new ArrayList<Question>();
   private Question currQuestion;
@@ -48,8 +47,8 @@ public class Main extends Application {
     try {
       BorderPane root = new BorderPane();
 
-      // FIXME Add Irenes num questions method.
-      Label displayNumQs = new Label("Total Questions: " + "AH");
+      // displays total number of questions
+      Label displayNumQs = new Label("Total Questions: " + questionDB.getNumAllQuestions());
       displayNumQs.setFont(Font.font("Verdana", 18));
       displayNumQs.setTextFill(Color.DARKGREEN);
 
@@ -144,15 +143,7 @@ public class Main extends Application {
         public void handle(MouseEvent e) {
 
           try {
-            // Creates file and adds questions to it.
-            String fileName = "questions-" + num;
-            File file = new File(fileName);
-            file.createNewFile();
-            questionDB.saveQuestionsToJSON(file);
-            // Increments field that differentiates the files made.
-            num++;
-            // successfully added file.
-            AddQuestionSuccess(primaryStage, "Sucessfullly Loaded", "Questions To JSON!");
+            saveJSON(primaryStage);
 
           } catch (Exception e1) {
             // File was not correctly made.
@@ -634,7 +625,7 @@ public class Main extends Application {
       Label fileNameLabel = new Label("Choose name for new file:");
       fileNameLabel.setTextFill(Color.DARKGREEN);
       TextField fileText = new TextField();
-      
+
       // instructions for file name
       Label fileNameGuidlines = new Label("*file name can't include: | / \\ \" : ? * < >");
       fileNameGuidlines.setTextFill(Color.RED);
@@ -809,7 +800,7 @@ public class Main extends Application {
       currQuestion.setTextFill(Color.DARKGREEN);
       currQuestion.setStyle("-fx-font: 18 arial;");
 
-      // Button to take the user to the next question. 
+      // Button to take the user to the next question.
       Button nextButton = new Button("Next");
       Label questionLabel =
           new Label("Question " + (currQuestionNum + 1) + quizQuestions.get(i).getQuestion());
@@ -993,6 +984,42 @@ public class Main extends Application {
 
     // button to take again home
     Button retakeQuizButton = new Button();
+    retakeQuizButton.setText("Take Quiz Again");
+    retakeQuizButton.setTextFill(Color.DARKGREEN);
+    retakeQuizButton.setStyle("-fx-font: 18 arial;");
+
+    // add elements to the grid
+    grid.add(title, 0, 0);
+    grid.add(score, 1, 0);
+    grid.add(homeButton, 2, 9);
+    grid.add(retakeQuizButton, 0, 9);
+
+    // Adds the scene to the stage.
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    primaryStage.setScene(scene);
+    primaryStage.show();
+
+    EventHandler<MouseEvent> reStartQuizEventHandler = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        // FIXME restart quiz not sure how that part of the code functions yet
+        // also probs not needed if its difficult to implement
+        // displayQuestion(primaryStage);
+      }
+    };
+    retakeQuizButton.addEventFilter(MouseEvent.MOUSE_CLICKED, reStartQuizEventHandler);
+
+    // Creating the mouse event handler for going back to homepage
+    EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        start(primaryStage);
+      }
+    };
+    // Registering the event filter
+    homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
+
+  }
 
   public static void main(String[] args) {
     questionDB = new QuestionDatabase();
