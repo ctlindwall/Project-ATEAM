@@ -1,5 +1,3 @@
-package application;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -121,7 +119,10 @@ public class QuestionDatabase {
         Choice[] choices = q.getChoices();
         for (Choice c : choices) {
           JSONObject cc = new JSONObject();
-          cc.put("isCorrect", c.getIsCorrect());
+          if(c.getIsCorrect()) 
+              cc.put("isCorrect", "T");
+          else
+        	  cc.put("isCorrect", "F");
           cc.put("choice", c.getChoice());
           choiceArray.add(cc);
         }
