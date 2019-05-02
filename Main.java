@@ -34,22 +34,22 @@ import javafx.scene.text.Text;
 public class Main extends Application {
   private static QuestionDatabase questionDB;
   private int num = 0;
+  // Data fields for when the quiz is occurring.
+  private ArrayList<Question> questions = new ArrayList<Question>();
+  private Question currQuestion;
+  private int currQuestionNum;
+  private int totalNumQuestions;
+  private int numIncorrect;
+  private int numQuestionsAnswered;
 
   @Override
   public void start(Stage primaryStage) {
-
-    // Data fields for when the quiz is occurring.
-    ArrayList<Question> questions = new ArrayList<Question>();
-    Question currQuestion;
-    int currQuestionNum;
-    int totalNumQuestions;
-    int numIncorrect;
 
     try {
       BorderPane root = new BorderPane();
 
       // FIXME Add Irenes num questions method.
-      Label displayNumQs = new Label("Total Questions: " + questionDB.getNumAllQuestions());
+      Label displayNumQs = new Label("Total Questions: " + "AH");
       displayNumQs.setFont(Font.font("Verdana", 18));
       displayNumQs.setTextFill(Color.DARKGREEN);
 
@@ -144,9 +144,15 @@ public class Main extends Application {
         public void handle(MouseEvent e) {
 
           try {
-
-            saveJSON(primaryStage);
-
+            // Creates file and adds questions to it.
+            String fileName = "questions-" + num;
+            File file = new File(fileName);
+            file.createNewFile();
+            questionDB.saveQuestionsToJSON(file);
+            // Increments field that differentiates the files made.
+            num++;
+            // successfully added file.
+            AddQuestionSuccess(primaryStage, "Sucessfullly Loaded", "Questions To JSON!");
 
           } catch (Exception e1) {
             // File was not correctly made.
@@ -243,7 +249,6 @@ public class Main extends Application {
       homeButton.setText("Back to Home");
       homeButton.setTextFill(Color.DARKGREEN);
       homeButton.setStyle("-fx-font: 18 arial;");
-
 
       // Adds a text field for the user to enter a question
       Label imageLabel = new Label("Image File:");
@@ -503,9 +508,14 @@ public class Main extends Application {
         public void handle(MouseEvent e) {
           List<Question> allQuestionsList = questionDB.getQuestions(topic);
           List<Question> quizQuestions = new ArrayList<Question>();
+          // FIXME random method?
           for (int i = 0; i < numQuestions; i++) {
             quizQuestions.add(allQuestionsList.get(i));
           }
+          totalNumQuestions = quizQuestions.size();
+          currQuestionNum = 0;
+          numQuestionsAnswered = 0;
+          numIncorrect = 0;
           displayQuestion(primaryStage, quizQuestions);
         }
       };
@@ -758,6 +768,13 @@ public class Main extends Application {
 
   }
 
+  /**
+   * This method is the display screen for a given quiz question. it will for loop each question the
+   * number of questions that the user requested.
+   * 
+   * @param primaryStage
+   * @param quizQuestions
+   */
   public void displayQuestion(Stage primaryStage, List<Question> quizQuestions) {
     GridPane grid = new GridPane();
     grid.setAlignment(Pos.CENTER);
@@ -768,16 +785,38 @@ public class Main extends Application {
     Scene scene = new Scene(grid, 500, 300);
     grid.setStyle("-fx-background-color: #f5f5dc");
 
-
     primaryStage.setTitle("Quiz");
-    for (int i = 0; i < quizQuestions.size(); i++) {
+
+    for (int i = 0; i < totalNumQuestions; i++) {
+      // Correct Label
+      Label correct = new Label("Correct");
+      correct.setTextFill(Color.GREEN);
+      correct.setStyle("-fx-font: 18 arial;");
+
+      // Correct Label
+      Label incorrect = new Label("Incorrect");
+      incorrect.setTextFill(Color.RED);
+      incorrect.setStyle("-fx-font: 18 arial;");
+
+      // Results Button.
+      Button results = new Button("Results");
+      results.setTextFill(Color.DARKGREEN);
+      results.setStyle("-fx-font: 18 arial;");
+
+      // FIXME include this.
+      // Tells the user what question they are on.
+      Label currQuestion = new Label("Current Question: " + (i + 1) + "/" + totalNumQuestions);
+      currQuestion.setTextFill(Color.DARKGREEN);
+      currQuestion.setStyle("-fx-font: 18 arial;");
+
+      // Button to take the user to the next question. 
       Button nextButton = new Button("Next");
-      Button prevButton = new Button("Previous");
-      Label questionLabel = new Label("Question " + (i + 1) + quizQuestions.get(i).getQuestion());
+      Label questionLabel =
+          new Label("Question " + (currQuestionNum + 1) + quizQuestions.get(i).getQuestion());
       questionLabel.setTextFill(Color.DARKGREEN);
       questionLabel.setStyle("-fx-font: 18 arial;");
 
-
+      // These buttons are for the choices.
       Button answer1 = new Button(quizQuestions.get(i).getChoices()[0].getChoice());
       answer1.setTextFill(Color.DARKGREEN);
       answer1.setStyle("-fx-font: 18 arial;");
@@ -794,21 +833,127 @@ public class Main extends Application {
       answer4.setTextFill(Color.DARKGREEN);
       answer4.setStyle("-fx-font: 18 arial;");
 
-
       grid.add(nextButton, 3, 4);
-      grid.add(prevButton, 0, 4);
       grid.add(questionLabel, 1, 0);
       grid.add(answer1, 1, 2);
       grid.add(answer2, 2, 2);
       grid.add(answer3, 1, 3);
       grid.add(answer4, 2, 3);
 
+      // Displays button to end quiz and show results if all questions have been answered.
+      if (numQuestionsAnswered == totalNumQuestions) {
+        // FIXME Add this to grid
+        // grid.add(results, 0, 0);
+      }
 
+      // Creating the mouse event to show results.
+      EventHandler<MouseEvent> answer1EventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          if (quizQuestions.get(currQuestionNum).getChoices()[0].getIsCorrect()) {
+            // FIXME correct add to page
+            // grid.add(correct, 0, 0);
+
+          } else {
+            // FIXME display incorrect
+            // grid.add(incorrect, 0, 0);
+            numIncorrect++;
+          }
+          numQuestionsAnswered++;
+          grid.add(nextButton, 3, 4);
+        }
+      };
+      // Registering the event filter
+      answer1.addEventFilter(MouseEvent.MOUSE_CLICKED, answer1EventHandler);
+
+      // Creating the mouse event to show results.
+      EventHandler<MouseEvent> answer2EventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          if (quizQuestions.get(currQuestionNum).getChoices()[1].getIsCorrect()) {
+            // FIXME correct add to page
+            // grid.add(correct, 0, 0);
+
+          } else {
+            // FIXME display incorrect
+            // grid.add(incorrect, 0, 0);
+            numIncorrect++;
+          }
+          numQuestionsAnswered++;
+          grid.add(nextButton, 3, 4);
+        }
+      };
+      // Registering the event filter
+      answer2.addEventFilter(MouseEvent.MOUSE_CLICKED, answer2EventHandler);
+
+      // Creating the mouse event to show results.
+      EventHandler<MouseEvent> answer3EventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          if (quizQuestions.get(currQuestionNum).getChoices()[2].getIsCorrect()) {
+            // FIXME correct add to page
+            // grid.add(correct, 0, 0);
+
+          } else {
+            // FIXME display incorrect
+            // grid.add(incorrect, 0, 0);
+            numIncorrect++;
+          }
+          numQuestionsAnswered++;
+          grid.add(nextButton, 3, 4);
+        }
+      };
+      // Registering the event filter
+      answer3.addEventFilter(MouseEvent.MOUSE_CLICKED, answer3EventHandler);
+
+      // Creating the mouse event to show results.
+      EventHandler<MouseEvent> answer4EventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          if (quizQuestions.get(currQuestionNum).getChoices()[3].getIsCorrect()) {
+            // FIXME correct add to page
+            // grid.add(correct, 0, 0);
+
+          } else {
+            // FIXME display incorrect
+            // grid.add(incorrect, 0, 0);
+            numIncorrect++;
+          }
+          numQuestionsAnswered++;
+          grid.add(nextButton, 3, 4);
+        }
+      };
+      // Registering the event filter
+      answer4.addEventFilter(MouseEvent.MOUSE_CLICKED, answer4EventHandler);
+
+
+      // Creating the mouse event handler that goes to next question.
+      EventHandler<MouseEvent> nextEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          currQuestionNum++;
+          displayQuestion(primaryStage, quizQuestions);
+        }
+      };
+      // Registering the event filter
+      nextButton.addEventFilter(MouseEvent.MOUSE_CLICKED, nextEventHandler);
+
+      // Creating the mouse event to show results.
+      EventHandler<MouseEvent> resultsEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          // FIXME Go to results page. (finished quiz)
+        }
+      };
+      // Registering the event filter
+      results.addEventFilter(MouseEvent.MOUSE_CLICKED, resultsEventHandler);
+
+
+      // Adds the scene to the stage.
+      scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+      primaryStage.setScene(scene);
+      primaryStage.show();
     }
-    // Adds the scene to the stage.
-    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-    primaryStage.setScene(scene);
-    primaryStage.show();
   }
 
   /**
@@ -848,42 +993,6 @@ public class Main extends Application {
 
     // button to take again home
     Button retakeQuizButton = new Button();
-    retakeQuizButton.setText("Take Quiz Again");
-    retakeQuizButton.setTextFill(Color.DARKGREEN);
-    retakeQuizButton.setStyle("-fx-font: 18 arial;");
-
-    // add elements to the grid
-    grid.add(title, 0, 0);
-    grid.add(score, 1, 0);
-    grid.add(homeButton, 2, 9);
-    grid.add(retakeQuizButton, 0, 9);
-
-    // Adds the scene to the stage.
-    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-    primaryStage.setScene(scene);
-    primaryStage.show();
-
-    EventHandler<MouseEvent> reStartQuizEventHandler = new EventHandler<MouseEvent>() {
-      @Override
-      public void handle(MouseEvent e) {
-        // FIXME restart quiz not sure how that part of the code functions yet
-        // also probs not needed if its difficult to implement
-        // displayQuestion(primaryStage);
-      }
-    };
-    retakeQuizButton.addEventFilter(MouseEvent.MOUSE_CLICKED, reStartQuizEventHandler);
-
-    // Creating the mouse event handler for going back to homepage
-    EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
-      @Override
-      public void handle(MouseEvent e) {
-        start(primaryStage);
-      }
-    };
-    // Registering the event filter
-    homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
-
-  }
 
   public static void main(String[] args) {
     questionDB = new QuestionDatabase();
