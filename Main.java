@@ -1,8 +1,11 @@
+package application;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.json.simple.parser.ParseException;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -13,11 +16,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -189,6 +196,36 @@ public class Main extends Application {
 			};
 			// Registering the event filter
 			loadButton.addEventFilter(MouseEvent.MOUSE_CLICKED, loadEventHandler);
+			
+			EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+
+
+		        Alert closeConfirmation =
+		            new Alert(Alert.AlertType.CONFIRMATION, "Would you like to save your questions?");
+		        closeConfirmation.getButtonTypes().remove(ButtonType.OK);
+		        closeConfirmation.getButtonTypes().remove(ButtonType.CANCEL);
+		        closeConfirmation.getButtonTypes().add(ButtonType.YES);
+		        closeConfirmation.getButtonTypes().add(ButtonType.NO);
+		        TextInputDialog text = new TextInputDialog("enter file name");
+
+
+		        closeConfirmation.setHeaderText("Confirm Exit");
+		        // TextInputDialog text = new TextInputDialog("Enter file name");
+
+
+		        Optional<ButtonType> res = closeConfirmation.showAndWait();
+
+		        if (res.isPresent()) {
+		          if (res.get().equals(ButtonType.YES)) {
+		            event.consume();
+		            exitPrompt(primaryStage);
+		          }
+		        }
+
+		      };
+
+		      primaryStage.setOnCloseRequest(confirmCloseEventHandler);
+
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -754,7 +791,7 @@ public class Main extends Application {
 		// Registering the event filter
 		homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
-	}
+  }
 
 	/**
 	 * This method is the display screen for a given quiz question. it will for loop
@@ -981,7 +1018,7 @@ public class Main extends Application {
 	 * @param numRight
 	 * @param totalNumQuestions
 	 */
-	public void finishedQuiz(Stage primaryStage, int numRight, int totalNumQuestions) {
+  public void finishedQuiz(Stage primaryStage, int numRight, int totalNumQuestions) {
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
 		grid.setHgap(5);
@@ -1047,6 +1084,86 @@ public class Main extends Application {
 		homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
 	}
+  
+  public void exitPrompt(Stage primaryStage) {
+
+    // text field for file name
+    Label fileNameLabel = new Label("Choose name for new file:");
+    fileNameLabel.setTextFill(Color.DARKGREEN);
+    TextField fileText = new TextField();
+
+    // instructions for file name
+    Label fileNameGuidlines = new Label("*file name can't include: | / \\ \" : ? * < >");
+    fileNameGuidlines.setTextFill(Color.RED);
+
+    // button to save file
+    Button saveFile = new Button();
+    saveFile.setText("Save file and exit");
+    saveFile.setTextFill(Color.DARKGREEN);
+    saveFile.setStyle("-fx-font: 18 arial;");
+
+    // create grid
+    GridPane grid = new GridPane();
+    grid.setAlignment(Pos.CENTER);
+    grid.setHgap(5);
+    grid.setVgap(5);
+    grid.setPadding(new Insets(25, 25, 25, 25));
+
+    // add elements to the grid
+    // grid.add(title, 0, 0);
+    grid.add(fileNameLabel, 0, 2);
+    grid.add(fileText, 0, 4);
+    grid.add(fileNameGuidlines, 2, 4);
+    grid.add(saveFile, 0, 9);
+    // grid.add(exitButton, 2, 9);
+
+    Scene scene = new Scene(grid, 500, 300);
+    grid.setStyle("-fx-background-color: #f5f5dc");
+
+    // Adds the scene to the stage.
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    primaryStage.setScene(scene);
+    primaryStage.show();
+    primaryStage.setTitle("Save Questions To JSON");
+
+
+    EventHandler<MouseEvent> saveFileEventHandler = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        String name = fileText.getText();
+
+        if (name == "") { // text field cannot be empty
+          ErrorOccurred(primaryStage);
+        } else if (questionDB.getNumAllQuestions() == 0) {
+          primaryStage.close();
+        } else {
+
+
+          try {
+            File file = new File(name); // create file with the name the user entered
+            // file.createNewFile();
+            questionDB.saveQuestionsToJSON(file);
+
+            // successfully added file.
+            primaryStage.close();
+
+          } catch (Exception e1) {
+            ErrorOccurred(primaryStage);
+          }
+        }
+      }
+
+    };
+
+    saveFile.addEventFilter(MouseEvent.MOUSE_CLICKED, saveFileEventHandler);
+
+    EventHandler<MouseEvent> ExitEventHandler = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {}
+
+
+    };
+  }
 
 	public static void main(String[] args) {
 		questionDB = new QuestionDatabase();
