@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.json.simple.parser.ParseException;
@@ -150,7 +151,6 @@ public class Main extends Application {
         public void handle(MouseEvent e) {
 
           try {
-            // Calls the save JSON method to save the questions.
             saveJSON(primaryStage);
 
           } catch (Exception e1) {
@@ -200,36 +200,6 @@ public class Main extends Application {
       };
       // Registering the event filter
       loadButton.addEventFilter(MouseEvent.MOUSE_CLICKED, loadEventHandler);
-
-      EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
-
-
-        Alert closeConfirmation =
-            new Alert(Alert.AlertType.CONFIRMATION, "Would you like to save your questions?");
-        closeConfirmation.getButtonTypes().remove(ButtonType.OK);
-        closeConfirmation.getButtonTypes().remove(ButtonType.CANCEL);
-        closeConfirmation.getButtonTypes().add(ButtonType.YES);
-        closeConfirmation.getButtonTypes().add(ButtonType.NO);
-        TextInputDialog text = new TextInputDialog("enter file name");
-
-
-        closeConfirmation.setHeaderText("Confirm Exit");
-        // TextInputDialog text = new TextInputDialog("Enter file name");
-
-
-        Optional<ButtonType> res = closeConfirmation.showAndWait();
-
-        if (res.isPresent()) {
-          if (res.get().equals(ButtonType.YES)) {
-            event.consume();
-            exitPrompt(primaryStage);
-          }
-        }
-
-      };
-
-      primaryStage.setOnCloseRequest(confirmCloseEventHandler);
-
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -300,7 +270,6 @@ public class Main extends Application {
       grid.setVgap(10);
       grid.setPadding(new Insets(25, 25, 25, 25));
 
-      // Adds all the buttons and labels to the grid for the user to opperate.
       grid.add(topicLabel, 0, 0);
       grid.add(topicText, 0, 1);
       grid.add(imageLabel, 2, 1);
@@ -377,20 +346,13 @@ public class Main extends Application {
 
           // Obtains the correct answer
           String answer = choices[0].getChoice();
-          // Obtains the string of the image.
+
           String image = loadImageButton.getText();
 
-          String metaData = metaDataText.getText();
-          // If user didn't enter a metadata, it is auto set to unused.
-          if ((metaData == null) || (metaData.equals(""))) {
-            metaData = "unused";
-          }
-          // Creates the question.
-          Question question = new Question(topic, choices, theQuestion, answer, image, metaData);
+          // FIXME passes in unused as default parameter becuase I dont understand
+          // metadata.
+          Question question = new Question(topic, choices, theQuestion, answer, image, "unused");
 
-          // If any error occurred, the error screen appears and question is not added. If all
-          // works out and all fields were answered, question is added and user is notified
-          // of the successful addition.
           if (error) {
             ErrorOccurred(primaryStage);
           } else {
@@ -406,7 +368,6 @@ public class Main extends Application {
       EventHandler<MouseEvent> loadImageEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent e) {
-          // Allows the user to pick a file to add.
           FileChooser fileChooser = new FileChooser();
           File file = fileChooser.showOpenDialog(primaryStage);
           if (file != null) {
@@ -589,14 +550,12 @@ public class Main extends Application {
       homeButton.setTextFill(Color.DARKGREEN);
       homeButton.setStyle("-fx-font: 18 arial;");
 
-      // Creates the grid.
       GridPane grid = new GridPane();
       grid.setAlignment(Pos.CENTER);
       grid.setHgap(5);
       grid.setVgap(5);
       grid.setPadding(new Insets(25, 25, 25, 25));
 
-      // Adds the titles and buttons to the grid.
       grid.add(title, 0, 0);
       grid.add(loadFileButton, 0, 1);
       grid.add(homeButton, 2, 9);
@@ -620,7 +579,6 @@ public class Main extends Application {
             loadFileButton.setText(file.getName());
             // Obtains the questions from the JSON file and saves them from the Database.
             try {
-              // Loads the question from the JSON file. catches any exceptions that get thrown.
               questionDB.loadQuestionsFromJSON(file);
             } catch (ParseException p) {
               p.printStackTrace();
@@ -776,14 +734,12 @@ public class Main extends Application {
     homeButton.setTextFill(Color.DARKGREEN);
     homeButton.setStyle("-fx-font: 18 arial;");
 
-    // Creates the grid. 
     GridPane grid = new GridPane();
     grid.setAlignment(Pos.CENTER);
     grid.setHgap(5);
     grid.setVgap(5);
     grid.setPadding(new Insets(25, 25, 25, 25));
 
-    // Adds the titles and button to the grid. 
     grid.add(title, 0, 0);
     grid.add(title1, 0, 1);
     grid.add(homeButton, 0, 2);
@@ -815,7 +771,6 @@ public class Main extends Application {
    * 
    * @param primaryStage
    * @param quizQuestions
-   * @throws FileNotFoundException 
    */
   public void displayQuestion(Stage primaryStage, Node<Question> q, int i) {
     GridPane grid = new GridPane();
@@ -828,15 +783,6 @@ public class Main extends Application {
     grid.setStyle("-fx-background-color: #f5f5dc");
 
     primaryStage.setTitle("Quiz");
-    
-    // The image portion of a question
-    Image image = null;
-    try {
-      image = new Image(new FileInputStream(q.getValue().getImage()));
-    } catch (FileNotFoundException e1) {
-      //no image 
-    }
-    ImageView imageView = new ImageView(image);
 
     // Correct Label
     Label correct = new Label("Correct");
@@ -880,17 +826,12 @@ public class Main extends Application {
     answer5.setTextFill(Color.DARKGREEN);
     answer5.setStyle("-fx-font: 18 arial;");
 
-    // Adds the labels and buttons to the grid. 
     grid.add(questionLabel, 1, 0);
     grid.add(answer1, 1, 2);
     grid.add(answer2, 2, 2);
     grid.add(answer3, 1, 3);
     grid.add(answer4, 2, 3);
     grid.add(answer5, 2, 4);
-    // FIXME need to place it in right spot. 
-    if (image != null) {
-    grid.add(imageView, 0, 0);
-    }
 
     // Creating the mouse event to show results.
     EventHandler<MouseEvent> answer1EventHandler = new EventHandler<MouseEvent>() {
@@ -1074,15 +1015,33 @@ public class Main extends Application {
     homeButton.setTextFill(Color.DARKGREEN);
     homeButton.setStyle("-fx-font: 18 arial;");
 
+    // button to take again home
+    Button retakeQuizButton = new Button();
+    retakeQuizButton.setText("Take Quiz Again");
+    retakeQuizButton.setTextFill(Color.DARKGREEN);
+    retakeQuizButton.setStyle("-fx-font: 18 arial;");
+
     // add elements to the grid
     grid.add(title, 0, 0);
     grid.add(score, 1, 0);
     grid.add(homeButton, 2, 9);
+    grid.add(retakeQuizButton, 0, 9);
 
     // Adds the scene to the stage.
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
+
+    EventHandler<MouseEvent> reStartQuizEventHandler = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        numIncorrect = 0; // set the number of incorrect questions back to 0
+        // FIXME restart quiz not sure how that part of the code functions yet
+        // also probs not needed if its difficult to implement
+        // displayQuestion(primaryStage);
+      }
+    };
+    retakeQuizButton.addEventFilter(MouseEvent.MOUSE_CLICKED, reStartQuizEventHandler);
 
     // Creating the mouse event handler for going back to homepage
     EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
@@ -1095,86 +1054,6 @@ public class Main extends Application {
     // Registering the event filter
     homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
 
-  }
-
-  public void exitPrompt(Stage primaryStage) {
-
-    // text field for file name
-    Label fileNameLabel = new Label("Choose name for new file:");
-    fileNameLabel.setTextFill(Color.DARKGREEN);
-    TextField fileText = new TextField();
-
-    // instructions for file name
-    Label fileNameGuidlines = new Label("*file name can't include: | / \\ \" : ? * < >");
-    fileNameGuidlines.setTextFill(Color.RED);
-
-    // button to save file
-    Button saveFile = new Button();
-    saveFile.setText("Save file and exit");
-    saveFile.setTextFill(Color.DARKGREEN);
-    saveFile.setStyle("-fx-font: 18 arial;");
-
-    // create grid
-    GridPane grid = new GridPane();
-    grid.setAlignment(Pos.CENTER);
-    grid.setHgap(5);
-    grid.setVgap(5);
-    grid.setPadding(new Insets(25, 25, 25, 25));
-
-    // add elements to the grid
-    // grid.add(title, 0, 0);
-    grid.add(fileNameLabel, 0, 2);
-    grid.add(fileText, 0, 4);
-    grid.add(fileNameGuidlines, 2, 4);
-    grid.add(saveFile, 0, 9);
-    // grid.add(exitButton, 2, 9);
-
-    Scene scene = new Scene(grid, 500, 300);
-    grid.setStyle("-fx-background-color: #f5f5dc");
-
-    // Adds the scene to the stage.
-    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-    primaryStage.setScene(scene);
-    primaryStage.show();
-    primaryStage.setTitle("Save Questions To JSON");
-
-
-    EventHandler<MouseEvent> saveFileEventHandler = new EventHandler<MouseEvent>() {
-      @Override
-      public void handle(MouseEvent e) {
-        String name = fileText.getText();
-
-        if (name == "") { // text field cannot be empty
-          ErrorOccurred(primaryStage);
-        } else if (questionDB.getNumAllQuestions() == 0) {
-          primaryStage.close();
-        } else {
-
-
-          try {
-            File file = new File(name); // create file with the name the user entered
-            // file.createNewFile();
-            questionDB.saveQuestionsToJSON(file);
-
-            // successfully added file.
-            primaryStage.close();
-
-          } catch (Exception e1) {
-            ErrorOccurred(primaryStage);
-          }
-        }
-      }
-
-    };
-
-    saveFile.addEventFilter(MouseEvent.MOUSE_CLICKED, saveFileEventHandler);
-
-    EventHandler<MouseEvent> ExitEventHandler = new EventHandler<MouseEvent>() {
-      @Override
-      public void handle(MouseEvent e) {}
-
-
-    };
   }
 
   public static void main(String[] args) {

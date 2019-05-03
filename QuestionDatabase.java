@@ -1,3 +1,5 @@
+package application;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -119,10 +121,10 @@ public class QuestionDatabase {
         Choice[] choices = q.getChoices();
         for (Choice c : choices) {
           JSONObject cc = new JSONObject();
-          if(c.getIsCorrect()) 
-              cc.put("isCorrect", "T");
+          if (c.getIsCorrect())
+            cc.put("isCorrect", "T");
           else
-        	  cc.put("isCorrect", "F");
+            cc.put("isCorrect", "F");
           cc.put("choice", c.getChoice());
           choiceArray.add(cc);
         }
@@ -158,36 +160,34 @@ public class QuestionDatabase {
   }
 
 
-  	/**
-	 * Randomizes the questions in a specific topic. Then returns them as a linked
-	 * list to be used to display the quiz.
-	 * 
-	 * @param topic
-	 *            the topic that the user requested the questions from
-	 * @param numQuestions
-	 *            the number of questions that the user requested for the quiz
-	 * @return topicQuestionsLinked the questions for the topic in a randomized
-	 *         linked list
-	 */
-	public List<Node<Question>> getQuestionsRandom(String topic, int numQuestions) {
-		List<Question> topicQuestions = null; // list of questions from the hash map
-		List<Node<Question>> topicQuestionsLinked = new LinkedList<Node<Question>>(); // linked list to be returned
+  /**
+   * Randomizes the questions in a specific topic. Then returns them as a linked list to be used to
+   * display the quiz.
+   * 
+   * @param topic the topic that the user requested the questions from
+   * @param numQuestions the number of questions that the user requested for the quiz
+   * @return topicQuestionsLinked the questions for the topic in a randomized linked list
+   */
+  public List<Node<Question>> getQuestionsRandom(String topic, int numQuestions) {
+    List<Question> topicQuestions = null; // list of questions from the hash map
+    List<Node<Question>> topicQuestionsLinked = new LinkedList<Node<Question>>(); // linked list to
+                                                                                  // be returned
 
-		if (topics.containsKey(topic)) {
-			topicQuestions = topics.get(topic); // get the questions for the specific topic
-			Collections.shuffle(topicQuestions); // randomize the list of questions
-		}
+    if (topics.containsKey(topic)) {
+      topicQuestions = topics.get(topic); // get the questions for the specific topic
+      Collections.shuffle(topicQuestions); // randomize the list of questions
+    }
 
-		for (int i = 0; i < numQuestions; i++) { // add each element from the array list to a
-													// linked list
-			Node<Question> n = new Node<Question>(topicQuestions.get(i));
-			topicQuestionsLinked.add(n);
-			if(i != 0)
-				topicQuestionsLinked.get(i - 1).setNext(n);
-		}
+    for (int i = 0; i < numQuestions; i++) { // add each element from the array list to a
+                                             // linked list
+      Node<Question> n = new Node<Question>(topicQuestions.get(i));
+      topicQuestionsLinked.add(n);
+      if (i != 0)
+        topicQuestionsLinked.get(i - 1).setNext(n);
+    }
 
-		return topicQuestionsLinked; // returned the randomizes linked list
-	}
+    return topicQuestionsLinked; // returned the randomizes linked list
+  }
 
   /**
    * Loads questions from the json file
