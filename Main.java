@@ -817,7 +817,7 @@ public class Main extends Application {
    * @param quizQuestions
    * @throws FileNotFoundException 
    */
-  public void displayQuestion(Stage primaryStage, Node<Question> q, int i) throws FileNotFoundException {
+  public void displayQuestion(Stage primaryStage, Node<Question> q, int i) {
     GridPane grid = new GridPane();
     grid.setAlignment(Pos.CENTER);
     grid.setHgap(5);
@@ -830,7 +830,12 @@ public class Main extends Application {
     primaryStage.setTitle("Quiz");
     
     // The image portion of a question
-    Image image = new Image(new FileInputStream(q.getValue().getImage()));
+    Image image = null;
+    try {
+      image = new Image(new FileInputStream(q.getValue().getImage()));
+    } catch (FileNotFoundException e1) {
+      //no image 
+    }
     ImageView imageView = new ImageView(image);
 
     // Correct Label
@@ -883,7 +888,9 @@ public class Main extends Application {
     grid.add(answer4, 2, 3);
     grid.add(answer5, 2, 4);
     // FIXME need to place it in right spot. 
+    if (image != null) {
     grid.add(imageView, 0, 0);
+    }
 
     // Creating the mouse event to show results.
     EventHandler<MouseEvent> answer1EventHandler = new EventHandler<MouseEvent>() {
@@ -1067,33 +1074,15 @@ public class Main extends Application {
     homeButton.setTextFill(Color.DARKGREEN);
     homeButton.setStyle("-fx-font: 18 arial;");
 
-    // button to take again home
-    Button retakeQuizButton = new Button();
-    retakeQuizButton.setText("Take Quiz Again");
-    retakeQuizButton.setTextFill(Color.DARKGREEN);
-    retakeQuizButton.setStyle("-fx-font: 18 arial;");
-
     // add elements to the grid
     grid.add(title, 0, 0);
     grid.add(score, 1, 0);
     grid.add(homeButton, 2, 9);
-    grid.add(retakeQuizButton, 0, 9);
 
     // Adds the scene to the stage.
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
-
-    EventHandler<MouseEvent> reStartQuizEventHandler = new EventHandler<MouseEvent>() {
-      @Override
-      public void handle(MouseEvent e) {
-        numIncorrect = 0; // set the number of incorrect questions back to 0
-        // FIXME restart quiz not sure how that part of the code functions yet
-        // also probs not needed if its difficult to implement
-        // displayQuestion(primaryStage);
-      }
-    };
-    retakeQuizButton.addEventFilter(MouseEvent.MOUSE_CLICKED, reStartQuizEventHandler);
 
     // Creating the mouse event handler for going back to homepage
     EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
