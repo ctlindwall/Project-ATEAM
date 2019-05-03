@@ -1,3 +1,5 @@
+package application;
+
 /**
  * The question class. Each question has a list of fields associated to it and this class allows for
  * the access of that information.
@@ -18,18 +20,21 @@ public class Question {
   private String question;
   private String answer;
   private String metaData;
-  
+
   // metadata (possibly use a boolean value instead? thoughts?)
 
   /**
-   * A costructor for the Question class.
+   * A constructor for the Question class.
    * 
-   * @param theTopic
-   * @param theChoices
-   * @param theQuestion
+   * @param theTopic topic of the question
+   * @param theChoices array of all the choices for a question
+   * @param theQuestion question text
+   * @param correctAnswer to the question
+   * @param image to go along with the question
+   * @param metaData for the user to put any additional notes for a question
    */
-  public Question(String theTopic, Choice[] theChoices, String theQuestion,
-      String correctAnswer, String image, String metaData) {
+  public Question(String theTopic, Choice[] theChoices, String theQuestion, String correctAnswer,
+      String image, String metaData) {
     topic = theTopic;
     choices = theChoices;
     question = theQuestion;
@@ -41,7 +46,7 @@ public class Question {
   /**
    * a getter method for the question
    * 
-   * @return
+   * @return question
    */
   public String getQuestion() {
     return question;
@@ -50,7 +55,7 @@ public class Question {
   /**
    * a getter method for the list of choices
    * 
-   * @return
+   * @return choices
    */
   public Choice[] getChoices() {
     return choices;
@@ -59,7 +64,7 @@ public class Question {
   /**
    * a getter method for the answer
    * 
-   * @return
+   * @return answer
    */
   public String getAnswer() {
     return answer;
@@ -68,7 +73,7 @@ public class Question {
   /**
    * a getter method for the topic
    * 
-   * @return
+   * @return topic
    */
   public String getTopic() {
     return topic;
@@ -77,16 +82,18 @@ public class Question {
   /**
    * a getter method for the getImage
    * 
-   * @return
+   * @return image
    */
   public String getImage() {
     return image;
   }
-  
+
   /**
    * getter method for the metaData
+   * 
+   * @return metaData
    */
   public String getMetaData() {
-	  return metaData;
+    return metaData;
   }
 }

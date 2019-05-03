@@ -27,7 +27,7 @@ public class Choice {
   /**
    * A getter method for a singular choice.
    * 
-   * @return
+   * @return option
    */
   public String getChoice() {
     return option;
@@ -36,7 +36,7 @@ public class Choice {
   /**
    * A getter method that tells if the choice is true or false.
    * 
-   * @return
+   * @return correct
    */
   public boolean getIsCorrect() {
     return correct;
