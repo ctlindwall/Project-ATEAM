@@ -1,3 +1,5 @@
+package application;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -25,7 +27,7 @@ import javafx.collections.ObservableList;
  *
  */
 public class QuestionDatabase {
-  private Map<String, List<Question>> topics; // hash map with all the topics and questions
+  private Map<String, List<Node<Question>>> topics; // hash map with all the topics and questions
   private ObservableList<String> observableTopics; // observable list for all the topics
   private int totalQuestions; // total number of questions in the database
 
@@ -33,8 +35,7 @@ public class QuestionDatabase {
    * Default constructor
    */
   public QuestionDatabase() {
-    // FIXME might need to account for resizing probs is ok tho
-    topics = new HashMap<String, List<Question>>(20);
+    topics = new HashMap<String, List<Node<Question>>>(20);
     observableTopics = FXCollections.observableArrayList();
     totalQuestions = 0;
   }
@@ -49,14 +50,17 @@ public class QuestionDatabase {
 
     if (topics.containsKey(topic)) {
       // get the list of questions associated with the topic
-      List<Question> topicQuestions = topics.get(topic);
-      topicQuestions.add(question); // add new question to the list
+      List<Node<Question>> topicQuestions = topics.get(topic);
+      Node<Question> node = new Node<Question>(question);
+      topicQuestions.add(node); // add new question to the list
       // topics.replace(topic, topicQuestions); // replace the topic key with the updated list of
       // questions
     } else { // topic is not in the hash map
       observableTopics.add(topic);
-      List<Question> topicQuestions = new LinkedList<Question>(); // new linked list of questions
-      topicQuestions.add(question); // add the new question to the list
+      List<Node<Question>> topicQuestions = new LinkedList<Node<Question>>(); // new linked list of
+                                                                              // questions
+      Node<Question> node = new Node<Question>(question);
+      topicQuestions.add(node); // add the new question to the list
       topics.put(topic, topicQuestions); // add the new topic and question to the hash map
     }
 
@@ -70,11 +74,9 @@ public class QuestionDatabase {
    * @return num the number of questions for a topic, will return 0 if topic does not exist
    */
   public int getNumQuestions(String topic) {
-    // FIXME not sure if we need this anymore -Irene
-
     int numQuestions = 0;
     if (topics.containsKey(topic)) { // check if topic is contained in hashmap
-      List<Question> topicQuestions = topics.get(topic);
+      List<Node<Question>> topicQuestions = topics.get(topic);
       numQuestions = topicQuestions.size(); // get the number of questions for that specific topic
     }
 
@@ -105,9 +107,10 @@ public class QuestionDatabase {
     JSONArray ja = new JSONArray();
 
     for (String topic : observableTopics) {
-      List<Question> questions = topics.get(topic);
+      List<Node<Question>> questions = topics.get(topic);
       JSONObject qq = new JSONObject();
-      for (Question q : questions) {
+      for (Node<Question> qqq : questions) {
+        Question q = qqq.getValue();
         qq = new JSONObject();
         qq.put("meta-data", q.getMetaData());
         qq.put("questionText", q.getQuestion());
@@ -119,10 +122,10 @@ public class QuestionDatabase {
         Choice[] choices = q.getChoices();
         for (Choice c : choices) {
           JSONObject cc = new JSONObject();
-          if(c.getIsCorrect()) 
-              cc.put("isCorrect", "T");
+          if (c.getIsCorrect())
+            cc.put("isCorrect", "T");
           else
-        	  cc.put("isCorrect", "F");
+            cc.put("isCorrect", "F");
           cc.put("choice", c.getChoice());
           choiceArray.add(cc);
         }
@@ -145,10 +148,10 @@ public class QuestionDatabase {
    * @param topic
    * @return questionList a list of questions for the given topic, null if topic does not exist
    */
-  public List<Question> getQuestions(String topic) {
+  public List<Node<Question>> getQuestions(String topic) {
     // FIXME not sure if we need this anymore -Irene
 
-    List<Question> topicQuestions = null;
+    List<Node<Question>> topicQuestions = null;
 
     if (topics.containsKey(topic)) {
       topicQuestions = topics.get(topic); // get the questions for the specific topic
@@ -166,9 +169,10 @@ public class QuestionDatabase {
    * @param numQuestions the number of questions that the user requested for the quiz
    * @return topicQuestionsLinked the questions for the topic in a randomized linked list
    */
-  public List<Question> getQuestionsRandom(String topic, int numQuestions) {
-    List<Question> topicQuestions = null; // list of questions from the hash map
-    List<Question> topicQuestionsLinked = new LinkedList<Question>(); // linked list to be returned
+  public List<Node<Question>> getQuestionsRandom(String topic, int numQuestions) {
+    List<Node<Question>> topicQuestions = null; // list of questions from the hash map
+    List<Node<Question>> topicQuestionsLinked = new LinkedList<Node<Question>>(); // linked list to
+                                                                                  // be returned
 
     if (topics.containsKey(topic)) {
       topicQuestions = topics.get(topic); // get the questions for the specific topic
@@ -176,7 +180,7 @@ public class QuestionDatabase {
     }
 
     for (int i = 0; i < numQuestions; i++) { // add each element from the array list to a
-                                                      // linked list
+                                             // linked list
       topicQuestionsLinked.add(topicQuestions.get(i));
     }
 

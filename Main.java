@@ -1,6 +1,7 @@
 package application;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +26,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -812,8 +815,9 @@ public class Main extends Application {
    * 
    * @param primaryStage
    * @param quizQuestions
+   * @throws FileNotFoundException 
    */
-  public void displayQuestion(Stage primaryStage, Node<Question> q, int i) {
+  public void displayQuestion(Stage primaryStage, Node<Question> q, int i) throws FileNotFoundException {
     GridPane grid = new GridPane();
     grid.setAlignment(Pos.CENTER);
     grid.setHgap(5);
@@ -824,6 +828,10 @@ public class Main extends Application {
     grid.setStyle("-fx-background-color: #f5f5dc");
 
     primaryStage.setTitle("Quiz");
+    
+    // The image portion of a question
+    Image image = new Image(new FileInputStream(q.getValue().getImage()));
+    ImageView imageView = new ImageView(image);
 
     // Correct Label
     Label correct = new Label("Correct");
@@ -874,6 +882,8 @@ public class Main extends Application {
     grid.add(answer3, 1, 3);
     grid.add(answer4, 2, 3);
     grid.add(answer5, 2, 4);
+    // FIXME need to place it in right spot. 
+    grid.add(imageView, 0, 0);
 
     // Creating the mouse event to show results.
     EventHandler<MouseEvent> answer1EventHandler = new EventHandler<MouseEvent>() {
