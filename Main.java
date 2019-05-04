@@ -38,6 +38,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 public class Main extends Application {
   private static QuestionDatabase questionDB;
@@ -200,6 +201,33 @@ public class Main extends Application {
       };
       // Registering the event filter
       loadButton.addEventFilter(MouseEvent.MOUSE_CLICKED, loadEventHandler);
+
+      EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+
+        // creates alert that pops up once user presses exit
+        Alert closeConfirmation =
+            new Alert(Alert.AlertType.CONFIRMATION, "Would you like to save your questions?");
+        // creates the buttons
+        closeConfirmation.getButtonTypes().remove(ButtonType.OK);
+        closeConfirmation.getButtonTypes().remove(ButtonType.CANCEL);
+        closeConfirmation.getButtonTypes().add(ButtonType.YES);
+        closeConfirmation.getButtonTypes().add(ButtonType.NO);
+
+        closeConfirmation.setHeaderText("Confirm Exit");
+
+        Optional<ButtonType> res = closeConfirmation.showAndWait(); // handles result
+
+        if (res.isPresent()) { // when button is pressed
+          if (res.get().equals(ButtonType.YES)) { // send to exit prompt stage before exiting
+            event.consume();
+            exitPrompt(primaryStage);
+          }
+        }
+
+      };
+
+      // initiates event
+      primaryStage.setOnCloseRequest(confirmCloseEventHandler);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -779,7 +807,7 @@ public class Main extends Application {
     grid.setVgap(5);
     grid.setPadding(new Insets(25, 25, 25, 25));
 
-    Scene scene = new Scene(grid, 500, 300);
+    Scene scene = new Scene(grid, 700, 500);
     grid.setStyle("-fx-background-color: #f5f5dc");
 
     primaryStage.setTitle("Quiz");
@@ -801,9 +829,21 @@ public class Main extends Application {
 
     // Button to take the user to the next question.
     Button nextButton = new Button("Next");
-    Label questionLabel = new Label("Question " + i + " " + q.getValue().getQuestion());
-    questionLabel.setTextFill(Color.DARKGREEN);
-    questionLabel.setStyle("-fx-font: 18 arial;");
+    nextButton.setTextFill(Color.BLACK);
+    nextButton.setStyle("-fx-font: 14 arial;");
+
+    // // label for question
+    // Label questionLabel = new Label("Question " + i);
+    // questionLabel.setTextFill(Color.BLACK);
+    // questionLabel.setStyle("-fx-font: 18 arial;");
+
+
+    // Button for the question
+    Label questionText = new Label("Question " + i + ": " + q.getValue().getQuestion());
+    questionText.setTextFill(Color.DARKGREEN);
+    questionText.setStyle("-fx-font: 18 arial;");
+    questionText.setWrapText(true);
+    questionText.setTextAlignment(TextAlignment.JUSTIFY);
 
     // These buttons are for the choices.
     Button answer1 = new Button(q.getValue().getChoices()[0].getChoice());
@@ -826,12 +866,13 @@ public class Main extends Application {
     answer5.setTextFill(Color.DARKGREEN);
     answer5.setStyle("-fx-font: 18 arial;");
 
-    grid.add(questionLabel, 1, 0);
-    grid.add(answer1, 1, 2);
-    grid.add(answer2, 2, 2);
-    grid.add(answer3, 1, 3);
-    grid.add(answer4, 2, 3);
-    grid.add(answer5, 2, 4);
+    // add elements to the grid
+    grid.add(questionText, 0, 1);
+    grid.add(answer1, 0, 2);
+    grid.add(answer2, 0, 3);
+    grid.add(answer3, 0, 4);
+    grid.add(answer4, 0, 5);
+    grid.add(answer5, 0, 6);
 
     // Creating the mouse event to show results.
     EventHandler<MouseEvent> answer1EventHandler = new EventHandler<MouseEvent>() {
@@ -848,7 +889,7 @@ public class Main extends Application {
             grid.add(incorrect, 0, 0);
             numIncorrect++;
           }
-          grid.add(nextButton, 3, 4);
+          grid.add(nextButton, 9, 0);
           q.setAnswered(true);
         }
       }
@@ -1015,33 +1056,17 @@ public class Main extends Application {
     homeButton.setTextFill(Color.DARKGREEN);
     homeButton.setStyle("-fx-font: 18 arial;");
 
-    // button to take again home
-    Button retakeQuizButton = new Button();
-    retakeQuizButton.setText("Take Quiz Again");
-    retakeQuizButton.setTextFill(Color.DARKGREEN);
-    retakeQuizButton.setStyle("-fx-font: 18 arial;");
 
     // add elements to the grid
     grid.add(title, 0, 0);
     grid.add(score, 1, 0);
     grid.add(homeButton, 2, 9);
-    grid.add(retakeQuizButton, 0, 9);
 
     // Adds the scene to the stage.
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
     primaryStage.setScene(scene);
     primaryStage.show();
 
-    EventHandler<MouseEvent> reStartQuizEventHandler = new EventHandler<MouseEvent>() {
-      @Override
-      public void handle(MouseEvent e) {
-        numIncorrect = 0; // set the number of incorrect questions back to 0
-        // FIXME restart quiz not sure how that part of the code functions yet
-        // also probs not needed if its difficult to implement
-        // displayQuestion(primaryStage);
-      }
-    };
-    retakeQuizButton.addEventFilter(MouseEvent.MOUSE_CLICKED, reStartQuizEventHandler);
 
     // Creating the mouse event handler for going back to homepage
     EventHandler<MouseEvent> backEventHandler = new EventHandler<MouseEvent>() {
@@ -1053,6 +1078,80 @@ public class Main extends Application {
     };
     // Registering the event filter
     homeButton.addEventFilter(MouseEvent.MOUSE_CLICKED, backEventHandler);
+
+  }
+
+  public void exitPrompt(Stage primaryStage) {
+
+    // text field for file name
+    Label fileNameLabel = new Label("Choose name for new file:");
+    fileNameLabel.setTextFill(Color.DARKGREEN);
+    TextField fileText = new TextField();
+
+    // instructions for file name
+    Label fileNameGuidlines = new Label("*file name can't include: | / \\ \" : ? * < >");
+    fileNameGuidlines.setTextFill(Color.RED);
+
+    // button to save file
+    Button saveFile = new Button();
+    saveFile.setText("Save file and exit");
+    saveFile.setTextFill(Color.DARKGREEN);
+    saveFile.setStyle("-fx-font: 18 arial;");
+
+    // create grid
+    GridPane grid = new GridPane();
+    grid.setAlignment(Pos.CENTER);
+    grid.setHgap(5);
+    grid.setVgap(5);
+    grid.setPadding(new Insets(25, 25, 25, 25));
+
+    // add elements to the grid
+    grid.add(fileNameLabel, 0, 2);
+    grid.add(fileText, 0, 4);
+    grid.add(fileNameGuidlines, 2, 4);
+    grid.add(saveFile, 0, 9);
+
+    Scene scene = new Scene(grid, 500, 300);
+    grid.setStyle("-fx-background-color: #f5f5dc");
+
+    // Adds the scene to the stage.
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    primaryStage.setScene(scene);
+    primaryStage.show();
+    primaryStage.setTitle("Save Questions To JSON");
+
+
+    // creating event for saving file on exiting
+    EventHandler<MouseEvent> saveFileEventHandler = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        String name = fileText.getText();
+
+        if (name == "") { // text field cannot be empty
+          ErrorOccurred(primaryStage);
+        } else if (questionDB.getNumAllQuestions() == 0) { // will not save anything if number of
+                                                           // quesitons is 0
+          primaryStage.close();
+        } else {
+
+
+          try {
+            File file = new File(name); // create file with the name the user entered
+            // file.createNewFile();
+            questionDB.saveQuestionsToJSON(file);
+
+            // successfully added file.
+            primaryStage.close();
+
+          } catch (Exception e1) {
+            ErrorOccurred(primaryStage);
+          }
+        }
+      }
+
+    };
+    // registering event filter
+    saveFile.addEventFilter(MouseEvent.MOUSE_CLICKED, saveFileEventHandler);
 
   }
 
