@@ -40,6 +40,15 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * This class is the driver for our Quiz Generator GUI. It takes in questions manually or
+ * via JSON files, and creates quizes to the specifications of the user.
+ * 
+ * BUG: Image files are not properly added to the question display.
+ * BUG: Next button sometimes shows up in the wrong location, or with '...' as its text
+ * @author ATEAM
+ *
+ */
 public class Main extends Application {
   private static QuestionDatabase questionDB;
   // Data fields for when the quiz is occurring.
@@ -831,12 +840,6 @@ public class Main extends Application {
     Button nextButton = new Button("Next");
     nextButton.setTextFill(Color.BLACK);
     nextButton.setStyle("-fx-font: 14 arial;");
-
-    // // label for question
-    // Label questionLabel = new Label("Question " + i);
-    // questionLabel.setTextFill(Color.BLACK);
-    // questionLabel.setStyle("-fx-font: 18 arial;");
-
 
     // Button for the question
     Label questionText = new Label("Question " + i + ": " + q.getValue().getQuestion());
